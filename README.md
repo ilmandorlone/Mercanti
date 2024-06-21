@@ -72,6 +72,7 @@ Impostare l'URL del backend nel file `.env` nella directory `frontend`:
 
 ```env
 REACT_APP_API_URL=http://localhost:3000/api/v1
+```
 
 ### Presentazione Interfaccia Utente
 
