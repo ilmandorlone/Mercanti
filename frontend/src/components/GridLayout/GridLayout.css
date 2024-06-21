@@ -1,0 +1,148 @@
+/* src/components/GridLayout/GridLayout.css */
+.container {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	background: radial-gradient(circle at bottom, rgba(205, 92, 92, 0.5), #001F54);
+	margin: 0;
+	padding: 0;
+	position: relative;
+	/* Assicurati che il contenitore principale sia posizionato relativamente */
+}
+
+.top-section {
+	display: flex;
+	flex: 8;
+	position: relative;
+	margin: 0;
+	padding: 0;
+}
+
+.players-area {
+	width: 320px; /* Imposta la larghezza fissa */
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	/* Assicurati che sia posizionato relativamente per l'overlay */
+	z-index: 0;
+}
+
+.board-area {
+	width: 50%;
+	min-width: 600px;
+	flex-direction: column;
+	position: relative;
+	/* Assicurati che sia posizionato relativamente per l'overlay */
+	z-index: 0;
+}
+
+.tokens-area {
+	flex: 5%;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+}
+
+.passengers-area {
+	flex: 15%;
+	justify-content: center;
+	align-items: center;
+	position: relative;
+}
+
+.bottom-section {
+	display: flex;
+	flex: 2;
+	align-items: flex-end;
+	justify-content: space-between;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	/* Assicurati che sia posizionato relativamente per l'overlay */
+}
+
+.player-status-wrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	background: linear-gradient(135deg, #FFFFF0, #F5F5DC);
+	/* Gradiente bianco avorio */
+	border-radius: 0;
+	border: 1px solid black;
+	box-shadow: 0 0 0 6px gold, 0 0 0 7px black;
+	border-top-right-radius: 20px;
+	/* Raggio pronunciato in alto a destra */
+	z-index: 2;
+	/* Metti sopra l'overlay */
+}
+
+.selected-tokens-wrapper {
+	width: 300px;
+	height: 170px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-end;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	background: linear-gradient(135deg, #FFFFF0, #F5F5DC);
+	/* Gradiente bianco avorio */
+	border-radius: 0;
+	border: 1px solid black;
+	box-shadow: 0 0 0 6px gold, 0 0 0 7px black;
+	border-top-left-radius: 20px;
+	/* Raggio pronunciato in alto a sinistra */
+	z-index: 2;
+	/* Metti sopra l'overlay */
+}
+
+.selected-tokens-area {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.end-turn-button {
+	margin-bottom: 20px;
+	padding: 10px 20px;
+	font-size: 1em;
+	font-weight: bold;
+	color: white;
+	background: #000;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.end-turn-button:hover {
+	background: #333;
+}
+
+/* Overlay per l'ombreggiatura */
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1;
+	pointer-events: none;
+	visibility: hidden;
+	/* Nascondi l'overlay di default */
+}
+
+.container.selected .overlay {
+	visibility: visible;
+	/* Mostra l'overlay quando una carta è selezionata */
+}
+
+.center-content {
+	text-align: center;
+	margin-top: 20%;
+}

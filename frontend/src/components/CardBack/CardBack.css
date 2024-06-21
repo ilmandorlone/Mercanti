@@ -1,0 +1,23 @@
+/* src/components/CardBack/CardBack.css */
+.card-back {
+	border: 8px solid #f5f5dc;
+	width: 100px;
+	height: 150px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+	font-size: 2em;
+	font-weight: bold;
+	color: white;
+	margin: 5px;
+	position: relative;
+	cursor: pointer;
+	transition: opacity 0.3s ease;
+}
+
+.card-back.selected {
+	z-index: 10;
+	box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5);
+	cursor: default;
+}

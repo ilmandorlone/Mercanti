@@ -1,0 +1,6 @@
+/* src/components/CardRow/CardRow.css */
+.card-row {
+	display: flex;
+	justify-content: center;
+	margin: 10px 0;
+}

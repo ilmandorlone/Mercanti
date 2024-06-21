@@ -1,0 +1,115 @@
+/* components/Card/Card.css */
+.card {
+	border: 8px solid #f5f5dc;
+	margin: 5px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100px;
+	height: 150px;
+	box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+	border-radius: 5px;
+	font-size: 1em;
+	text-align: center;
+	position: relative;
+	cursor: pointer;
+}
+
+.card.reserved {
+	width: 80px;
+	height: 120px;
+}
+
+.selected {
+	z-index: 10;
+	box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5);
+	cursor: default;
+}
+
+.card .buttons {
+	display: none;
+}
+
+.card.selected .buttons {
+	display: flex;
+}
+
+.card-cost {
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.cost-row {
+	display: flex;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+.card-cost .token {
+	width: 15px;
+	height: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	font-size: 0.8em;
+	font-weight: bold;
+	color: white;
+	border: 1px solid black;
+	margin: 2px;
+}
+
+.card-points {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.star {
+	width: 30px;
+	height: 30px;
+	background: linear-gradient(135deg, #FFD700, #FFA500);
+	clip-path: polygon(50% 0%,
+			61% 35%,
+			98% 35%,
+			68% 57%,
+			79% 91%,
+			50% 70%,
+			21% 91%,
+			32% 57%,
+			2% 35%,
+			39% 35%);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5%;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+	position: relative;
+}
+
+.star::before {
+	content: '';
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	right: -2px;
+	bottom: -2px;
+	background: linear-gradient(135deg, #FFF700, #FF9500);
+	clip-path: inherit;
+	filter: blur(2px);
+	z-index: -1;
+	border-radius: 5%;
+}
+
+.points {
+	font-size: 1em;
+	font-weight: bold;
+	color: black;
+}

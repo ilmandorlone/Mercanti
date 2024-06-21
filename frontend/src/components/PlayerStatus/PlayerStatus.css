@@ -1,0 +1,102 @@
+/* components/PlayerStatus/PlayerStatus.css */
+.player-status {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+}
+
+.cards-tokens-wrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
+
+.cards,
+.tokens_player {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	width: 100%;
+	margin-bottom: 8px;
+}
+
+.card-rect {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 5px;
+	font-size: 1.2em;
+	font-weight: bold;
+	border: 1px solid black;
+}
+
+.card-rect.reserved {
+	background: linear-gradient(135deg, #FFD700, #ffecb3);
+	/* Gradiente dorato */
+}
+
+.player-status-token {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 50%;
+	font-size: 1.2em;
+	font-weight: bold;
+	border: 1px solid black;
+}
+
+.card-count,
+.token-count {
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
+.reserved-cards {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	margin-left: 20px; /* Spazio tra i gettoni e le carte riservate */
+}
+
+.reserved-cards .card {
+	width: 80px; /* Ridimensiona le carte riservate */
+	height: 120px; /* Ridimensiona le carte riservate */
+}
+
+.player-status-wrapper {
+	width: auto; /* Rendi flessibile la larghezza */
+	height: 150px;
+	max-width: 900px; /* Imposta una larghezza massima */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	background: linear-gradient(135deg, #FFFFF0, #F5F5DC);
+	/* Gradiente bianco avorio */
+	border-radius: 0;
+	border: 1px solid black;
+	box-shadow: 0 0 0 6px gold, 0 0 0 7px black;
+	border-top-right-radius: 20px;
+	border-top-left-radius: 20px;
+	padding: 10px;
+}
+
+.card-rect.zero,
+.player-status-token.zero {
+    background: transparent !important;
+    color: transparent !important; /* Make the text transparent */
+	border: 1px solid black;
+}

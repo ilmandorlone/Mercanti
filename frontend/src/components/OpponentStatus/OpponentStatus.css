@@ -1,0 +1,102 @@
+/* components/OpponentStatus/OpponentStatus.css */
+.opponent-status {
+	border: 1px solid #ccc;
+	padding: 10px;
+	margin: 10px;
+	border-radius: 5px;
+	background: #f9f9f9;
+	display: flex;
+	flex-direction: column;
+	align-items: left;
+	position: relative;
+	/* For positioning the star icon */
+}
+
+.opponent-header {
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	align-items: center;
+	position: relative;
+	/* For positioning the points text */
+}
+
+.opponent-name {
+	margin: 5px 0;
+}
+
+.opponent-points {
+	display: flex;
+	align-items: center;
+	position: absolute;
+	top: 5px;
+	/* Adjusted for better positioning */
+	right: 5px;
+	/* Adjusted for better positioning */
+}
+
+.star-icon {
+	font-size: 4em;
+	/* Make the star icon larger */
+	color: transparent;
+	background: linear-gradient(45deg, #FFD700, #FFA500);
+	-webkit-background-clip: text;
+	background-clip: text;
+	position: relative;
+	/* For positioning the points text */
+}
+
+.points-text {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 1.5em;
+	color: black;
+	pointer-events: none;
+	/* To ensure the text does not interfere with clicks */
+}
+
+.opponent-cards-row,
+.opponent-tokens-row {
+	display: flex;
+	margin: 5px 0;
+}
+
+.opponent-card-count {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0 2px;
+	border-radius: 3px;
+	color: rgb(155, 15, 15);
+	font-size: 0.8em;
+	font-weight: bold;
+	border: 1px solid black;
+}
+
+.opponent-token-count {
+	width: 20px;
+	height: 20px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 0 2px;
+	border-radius: 50%;
+	/* Make tokens circular */
+	color: white;
+	font-size: 0.8em;
+	font-weight: bold;
+	border: 1px solid black;
+}
+
+.opponent-card-count.zero,
+.opponent-token-count.zero {
+	background: transparent !important;
+	color: transparent !important;
+	/* Make the text transparent */
+	border: 1px solid black;
+	opacity: 0.4;
+}

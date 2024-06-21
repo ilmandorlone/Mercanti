@@ -1,0 +1,12 @@
+# .gitignore in root
+node_modules/
+build/
+.env
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.idea/
+.vscode/

@@ -1,0 +1,44 @@
+/* components/CardButtons/CardButtons.css */
+.buttons {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	top: 10px;
+	/* Posiziona i pulsanti in alto */
+	left: 50%;
+	transform: translateX(-50%);
+	gap: 10px;
+}
+
+.button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 80px;
+	height: 30px;
+	padding: 5px 10px;
+	border-radius: 5px;
+	color: white;
+	font-weight: bold;
+	border: 2px solid black;
+	cursor: pointer;
+}
+
+.button.disabled {
+	background: grey;
+	cursor: not-allowed;
+}
+
+.icon {
+	margin-right: 5px;
+}
+
+.purchase {
+	background: linear-gradient(135deg, #008000, #b3ffb3);
+	/* Verde */
+}
+
+.reserve {
+	background: linear-gradient(135deg, #FFD700, #ffecb3);
+	/* Giallo */
+}
