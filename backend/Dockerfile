@@ -5,12 +5,12 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copia il file requirements.txt e installa le dipendenze
-COPY ./backend/requirements.txt /app/requirements.txt
+COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 RUN pip install debugpy
 
 # Copia tutto il codice del backend
-COPY ./backend /app
+COPY . /app
 
 # Comando di avvio
 CMD ["python", "run_uvicorn.py"]

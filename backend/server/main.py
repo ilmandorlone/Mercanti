@@ -2,12 +2,12 @@ import uvicorn
 import logging
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from app.schemas import (
+from server.schemas import (
     SelectTokenActionSchema, SelectCardActionSchema,
     ReserveCardBackActionSchema, GetGameStateActionSchema,
     ReserveCardActionSchema
 )
-from app.crud import (
+from server.crud import (
     load_cards, refill_visible_cards, refill_visible_passengers,
     get_game_state_by_id, purchase_card, reserve_card,
     select_token
