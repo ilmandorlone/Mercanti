@@ -7,6 +7,7 @@ WORKDIR /app
 # Copia il file requirements.txt e installa le dipendenze
 COPY ./backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install debugpy
 
 # Copia tutto il codice del backend
 COPY ./backend /app
