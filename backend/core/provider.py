@@ -25,7 +25,7 @@ class Provider:
     def list_matches(self) -> Dict[int, Match]:
         return self.matches
     
-    def create_player(self, player_name: str, player_id: int) -> Player:
+    def create_player(self, player_id: int, player_name: str) -> Player:
         return Player(
             id=player_id,
             name=player_name,

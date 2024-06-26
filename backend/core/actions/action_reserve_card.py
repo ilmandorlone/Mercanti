@@ -21,12 +21,12 @@ class ActionReserveCard(Action):
             return False
 
         # Trova la carta tra le carte visibili
-        card = MatchHelper.get_card_by_id(self.match, self.card_id, self.level)
+        card = MatchHelper.get_card_by_id(self.match, self.card_id)
 
         # Verifica che la carta sia stata trovata
         if not card:
             # Verifica se la carta è la prima tra i mazzi nascosti
-            for level in [self.match.visible_level1, self.match.visible_level2, self.match.visible_level3]:
+            for level in [self.match.deck_level1, self.match.deck_level2, self.match.deck_level3]:
                 if level and level[0].id == self.card_id:
                     return True
     

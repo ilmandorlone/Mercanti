@@ -15,9 +15,12 @@ class MatchHelper:
     @staticmethod
     def get_card_by_id(match: Match, card_id: int) -> Card:
         for player in match.players:
+            # Verifica se la carta è tra le carte riservate del giocatore
             for card in player.reserved_cards:
                 if card.id == card_id:
                     return card
+            
+            # Verifica se la carta è tra le carte visibili
             for level in [match.visible_level1, match.visible_level2, match.visible_level3]:
                 for card in level:
                     if card.id == card_id:

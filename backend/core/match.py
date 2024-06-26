@@ -1,8 +1,10 @@
+from itertools import combinations
 import json
 from typing import List
 from collections import Counter
 import logging
-from core.models import CardCount, Player, Card, Token, Passenger, TokenAction, TokenActionEnum
+from core.actions.action import Action
+from core.models import CardCount, ColorEnum, Player, Card, Token, Passenger, TokenAction, TokenActionEnum
 import random
 
 logger = logging.getLogger(__name__)
@@ -10,6 +12,8 @@ logger = logging.getLogger(__name__)
 class Match:
     def __init__(self, players: List[Player]):
         self.players = players
+        self.player_move_callback = None
+        self.round = 0
 
         # Inizializza i gettoni in base al numero di giocatori
         token_init_by_players = { 2: 4, 3: 5, 4: 7 }
@@ -89,12 +93,35 @@ class Match:
                 self.visible_passengers.remove(passenger)
                 break
 
-    def get_next_card_id_by_level(self, level: int):
+    def select_deck_level_by_level(self, level: int):
         if level == 1:
-            return self.deck_level1[0].id
+            return self.deck_level1
         elif level == 2:
-            return self.deck_level2[0].id
+            return self.deck_level2
         elif level == 3:
-            return self.deck_level3[0].id
+            return self.deck_level3
         else:
             raise ValueError(f"Invalid level {level}")
+
+    def get_next_card_id_by_level(self, level: int):
+        return self.select_deck_level_by_level(level)[0].id
+    
+    def set_player_move_callback(self, player_move_callback):
+        self.player_move_callback = player_move_callback
+    
+    def run(self):
+        winner = None
+
+        while 1:
+            self.round += 1
+
+            for player in self.players:
+                # esegui la callback per ottenere l'azione del giocatore
+                self.player_move_callback(self, player)
+
+                # Verifica se il giocatore ha vinto
+                if player.points >= 15:
+                    winner = player
+            
+            if winner:
+                return winner

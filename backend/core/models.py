@@ -51,6 +51,6 @@ class TokenActionEnum(Enum):
     BUY = "buy"
 
 class TokenAction(BaseModel):
-    action: TokenActionEnum
     color: str
     count: int
+    action: str  # "buy" o "return"

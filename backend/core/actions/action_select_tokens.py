@@ -7,7 +7,7 @@ from core.actions.action import Action
 
 # Implementazione della classe ActionSelectTokens che eredita da Action
 class ActionSelectTokens(Action):
-    def __init__(self, match: Match, player_id, token_actions):
+    def __init__(self, match: Match, player_id: int, token_actions):
         super().__init__(player_id)
         self.token_actions = token_actions
         self.match = match
@@ -45,18 +45,16 @@ class ActionSelectTokens(Action):
         
         # Verifica che i colori dei gettoni selezionati per l'acquisto siano validi
         buy_colors = [action.color for action in buy_actions]
+        return_colors = [action.color for action in return_actions]
 
-        # Verifica che i colori siano tutti diversi
-        if len(buy_colors) != len(set(buy_colors)):
+        # Verifica che non ci siano gettoni "gold" tra quelli selezionati per l'acquisto o tra quelli restituiti
+        if "gold" in buy_colors + return_colors:
+            raise ValueError("Cannot buy or return gold tokens")
+
+        # Verifica se il giocatore ha selezionato 2 uguali
+        if total_tokens_to_buy == 2 and len(buy_colors) == 1:
+
             # Il giocatore ha selezionato 2 gettoni dello stesso colore
-
-            # Verifica che il giocatore non abbia selezionato più di 2 gettoni dello stesso colore
-            if len(buy_colors) != 2:
-                raise ValueError("Is not possible to buy more than 2 tokens of the same color")
-            
-            # Verifica che il giocatore abbia selezionato 2 colori uguali
-            if buy_colors[0] != buy_colors[1]:
-                raise ValueError("If buying 2 tokens, they must be of the same color")
             
             # Verifica che ci siano almeno 4 gettoni disponibili di quel colore
             available_token = next((t for t in self.match.tokens if t.color == buy_colors[0]), None)
@@ -64,6 +62,17 @@ class ActionSelectTokens(Action):
                 raise ValueError("There must be at least 4 tokens available of the selected color to buy 2")
         else:
             # Il giocatore ha selezionato 3 gettoni di colori diversi
+
+            # Verifica che non ci siano più di 1 gettone di un colore selezionato per l'acquisto
+            if any(count > 1 for count in Counter(buy_colors).values()):
+                raise ValueError("Cannot buy more than 1 token of the same color when buying different colors")
+
+            # Verifica che per ogni colore selezionato ci siano almeno 1 gettone disponibile
+            for color in buy_colors:
+                available_token = next((t for t in self.match.tokens if t.color == color), None)
+                if not available_token or available_token.count < 1:
+                    raise ValueError(f"There must be at least 1 token available of color {color} to buy 3")
+
             # Verifica che i colori siano tutti diversi
             if len(buy_colors) != len(set(buy_colors)):
                 raise ValueError("If buying 3 tokens, they must be of different colors")
@@ -74,7 +83,6 @@ class ActionSelectTokens(Action):
             return True
         except ValueError:
             return False
-
 
     def execute(self):
         # Verifica che le azioni siano valide
@@ -89,11 +97,7 @@ class ActionSelectTokens(Action):
             player_token = next((t for t in player.tokens if t.color == action.color), None)
 
             if action.action == TokenActionEnum.BUY.value:
-                if action.color == "gold":
-                    raise ValueError("Cannot buy gold tokens")
                 if table_token and table_token.count >= action.count:
-                    if action.count == 2 and table_token.count < 4:
-                        raise ValueError("There must be at least 4 tokens available to buy 2 of the same color")
                     table_token.count -= action.count
                     if player_token:
                         player_token.count += action.count

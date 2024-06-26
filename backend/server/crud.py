@@ -18,8 +18,8 @@ current_match : Match = None
 def init_match(file_path: str):
     global current_match
 
-    players = [ provider_instance.create_player("Player 1", 1),
-                provider_instance.create_player("Player 2", 2) ]
+    players = [ provider_instance.create_player(1, "Player 1"),
+                provider_instance.create_player(2, "Player 2") ]
     
     current_match = provider_instance.new_match(players)
     current_match.load_cards(file_path)
@@ -81,6 +81,10 @@ def purchase_card(player_id: int, card_id: int):
 def reserve_card(player_id: int, level: int, card_id: int):
     # Se non è specificato l'id della carta, recupera l'id della carta dal livello specificato
     if not card_id:
+        # Verifica se c'è una carta disponibile nel livello specificato
+        if not current_match.select_deck_level_by_level(level):
+            raise ValueError(f"No cards available in level {level}")
+        
         # Recupera l'id della carta dal livello specificato
         card_id = current_match.get_next_card_id_by_level(level)
 

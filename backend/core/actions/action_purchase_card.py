@@ -21,10 +21,10 @@ class ActionPurchaseCard(Action):
 
         # Verifica che la carta sia stata trovata
         if not card:
-            raise ValueError(f"Card with id {self.card_id} not found in visible cards or reserved cards")
+            return False
 
         # Verifica che il giocatore abbia abbastanza gettoni per acquistare la carta (considerando gli sconti) o abbia abbastanza jolly
-        if not player.has_enough_tokens(card.cost):
+        if not PlayerHelper.has_enough_tokens(player, card):
             return False
 
         return True
