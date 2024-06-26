@@ -70,6 +70,10 @@ match.load_cards("backend/core/setup.json")
 # Imposta la callback per il turno del giocatore
 match.set_player_move_callback(player_move)
 
+players[0].set_callback_move(player_move)
+players[1].set_callback_move(player_move)
+players[2].set_callback_move(player_move)
+
 # Avvia la partita e determina il vincitore
 winner = match.run()
 

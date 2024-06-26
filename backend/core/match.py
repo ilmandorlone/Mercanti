@@ -3,6 +3,9 @@ import json
 from typing import List
 from collections import Counter
 import logging
+from core.turn_manager import TurnManager
+from core.human_player import HumanPlayer
+from core.cpu_player import CPUPlayer
 from core.actions.action import Action
 from core.models import CardCount, ColorEnum, Player, Card, Token, Passenger, TokenAction, TokenActionEnum
 import random
@@ -12,8 +15,8 @@ logger = logging.getLogger(__name__)
 class Match:
     def __init__(self, players: List[Player]):
         self.players = players
-        self.player_move_callback = None
         self.round = 0
+        self.turn_manager = TurnManager(players)
 
         # Inizializza i gettoni in base al numero di giocatori
         token_init_by_players = { 2: 4, 3: 5, 4: 7 }
@@ -106,9 +109,6 @@ class Match:
     def get_next_card_id_by_level(self, level: int):
         return self.select_deck_level_by_level(level)[0].id
     
-    def set_player_move_callback(self, player_move_callback):
-        self.player_move_callback = player_move_callback
-    
     def run(self):
         winner = None
 
@@ -117,7 +117,8 @@ class Match:
 
             for player in self.players:
                 # esegui la callback per ottenere l'azione del giocatore
-                self.player_move_callback(self, player)
+                # cast di player a CPUPlayer per chiamare la callback
+                player.callback_move(self, player.id)
 
                 # Verifica se il giocatore ha vinto
                 if player.points >= 15:

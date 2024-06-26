@@ -1,14 +1,13 @@
+from typing import Any
 from core.models import Player
+from pydantic import BaseModel
+from typing import List, Optional, Callable
 
 class CPUPlayer(Player):
-    def __init__(self, id: int, name: str):
-        super().__init__(
-            id=id,
-            name=name,
-            cards_count=[],
-            tokens=[],
-            reserved_cards=[],
-            reserved_cards_count=0,
-            points=0,
-            passengers=[]
-        )
+    callback_move: Optional[Callable[[dict], None]] = None
+    
+    def set_callback_move(self, callback: Any):
+        self.callback_move = callback
+
+    def move_callback(self):
+        self.callback_move(self)

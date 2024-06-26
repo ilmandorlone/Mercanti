@@ -1,4 +1,6 @@
 from typing import List
+from core.cpu_player import CPUPlayer
+from core.actions.get_all_possible_actions import get_all_possible_actions
 from core.actions.action_select_tokens import ActionSelectTokens
 from core.actions.action_purchase_card import ActionPurchaseCard
 from core.actions.action_reserve_card import ActionReserveCard
@@ -11,86 +13,73 @@ import logging
 from core.provider import provider_instance
 from core.models import Player, Card, Token, Passenger
 from core.match import Match
+from server.connection_manager import connection_manager
 
 logger = logging.getLogger(__name__)
-current_match : Match = None
 
 def init_match(file_path: str):
-    global current_match
 
-    players = [ provider_instance.create_player(1, "Player 1"),
-                provider_instance.create_player(2, "Player 2") ]
+    human_player = provider_instance.create_player(1, "Player 1")
+    cpu_player = provider_instance.create_cpu_player(player_id=2, player_name="Player 2 CPU")
+    players = [ human_player, cpu_player ]
     
-    current_match = provider_instance.new_match(players)
-    current_match.load_cards(file_path)
+    provider_instance.current_match = provider_instance.new_match(players)
+    provider_instance.current_match.load_cards(file_path)
 
-def get_game_state_by_id(player_id: int):
-    global current_match
+    def move_callback(player: Player):
+        # Ottiene tutte le azioni possibili per il giocatore
+        actions = get_all_possible_actions(provider_instance.current_match, player.id)
 
-    main_player = None
-    opponents = []
-
-    for player in current_match.players:
-        # Se i dati dei giocatori sono inizializzati correttamente, non è necessario questo conteggio
-        cards_count = player.cards_count
+        if actions:        
+            # Esegue un'azione random tra quelle disponibili
+            action = random.choice(actions)
+            action.execute()
         
-        if player.id == player_id:
-            main_player = Player(
-                id=player.id,
-                name=player.name,
-                cards_count=cards_count,
-                tokens=player.tokens,
-                reserved_cards=player.reserved_cards,
-                reserved_cards_count=len(player.reserved_cards),
-                points=player.points
-            )
-        else:
-            opponent = Player(
-                id=player.id,
-                name=player.name,
-                cards_count=cards_count,
-                tokens=player.tokens,
-                reserved_cards=[],
-                reserved_cards_count=len(player.reserved_cards),
-                points=player.points
-            )
-            opponents.append(opponent)
+        connection_manager.broadcast_game_state()
 
-    if main_player is None:
-        raise ValueError(f"Player with id {player_id} not found")
-
-    return {
-        "player": main_player,
-        "opponents": opponents,
-        "tokens": current_match.tokens,
-        "remaining_cards": {
-            "level1": len(current_match.deck_level1),
-            "level2": len(current_match.deck_level2),
-            "level3": len(current_match.deck_level3)
-        },
-        "visible_level1": [Card(**card.dict()) for card in current_match.visible_level1],
-        "visible_level2": [Card(**card.dict()) for card in current_match.visible_level2],
-        "visible_level3": [Card(**card.dict()) for card in current_match.visible_level3],
-        "visible_passengers": [Passenger(**passenger.dict()) for passenger in current_match.visible_passengers],
-    }
+    cpu_player.set_callback_move(move_callback)
 
 def purchase_card(player_id: int, card_id: int):
-    action = ActionPurchaseCard(current_match, player_id, card_id)
+    # Verifica il turno del giocatore
+    if provider_instance.current_match.turn_manager.check_turn_id(player_id) is False:
+        raise ValueError(f"Player with id {player_id} cannot play now")
+
+    # Esegue l'azione di acquisto della carta
+    action = ActionPurchaseCard(provider_instance.current_match, player_id, card_id)
     action.execute()
 
+    # Termina il turno del giocatore
+    provider_instance.current_match.turn_manager.end_turn(player_id)
+
 def reserve_card(player_id: int, level: int, card_id: int):
+    # Verifica il turno del giocatore
+    if provider_instance.current_match.turn_manager.check_turn_id(player_id) is False:
+        raise ValueError(f"Player with id {player_id} cannot play now")
+    
     # Se non è specificato l'id della carta, recupera l'id della carta dal livello specificato
     if not card_id:
         # Verifica se c'è una carta disponibile nel livello specificato
-        if not current_match.select_deck_level_by_level(level):
+        if not provider_instance.current_match.select_deck_level_by_level(level):
             raise ValueError(f"No cards available in level {level}")
         
         # Recupera l'id della carta dal livello specificato
-        card_id = current_match.get_next_card_id_by_level(level)
+        card_id = provider_instance.current_match.get_next_card_id_by_level(level)
 
-    action = ActionReserveCard(current_match, player_id, card_id)
+    # Esegue l'azione di riserva della carta
+    action = ActionReserveCard(provider_instance.current_match, player_id, card_id)
     action.execute()
+
+    # Termina il turno del giocatore
+    provider_instance.current_match.turn_manager.end_turn(player_id)
 
 def select_token(player_id: int, token_actions: List[TokenActionSchema]):
-    action = ActionSelectTokens(current_match, player_id, token_actions)
+    # Verifica il turno del giocatore
+    if provider_instance.current_match.turn_manager.check_turn_id(player_id) is False:
+        raise ValueError(f"Player with id {player_id} cannot play now")
+    
+    # Esegue l'azione di selezione dei token
+    action = ActionSelectTokens(provider_instance.current_match, player_id, token_actions)
     action.execute()
+
+    # Termina il turno del giocatore
+    provider_instance.current_match.turn_manager.end_turn(player_id)

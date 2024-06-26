@@ -1,9 +1,13 @@
+from typing import Any
 from core.models import Player
+from pydantic import BaseModel
+from typing import List, Optional, Callable
 
 class HumanPlayer(Player):
-    def __init__(self, player_id: int, player_name: str):
-        super().__init__(player_id, player_name)
-        self.is_cpu = False
+    callback_move: Optional[Callable[[dict], None]] = None
+    
+    def set_callback_move(self, callback: Any):
+        self.callback_move = callback
 
-    def play(self):
-        print(f"Human Player {self.name} is playing...")
+    def move_callback(self):
+        self.callback_move(self)
