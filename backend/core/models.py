@@ -1,6 +1,16 @@
-# server/models.py
+# core/models.py
+
+from enum import Enum
 from typing import List
 from pydantic import BaseModel
+
+class ColorEnum(str, Enum):
+    VIOLET = "violet"
+    BLUE = "blue"
+    GREEN = "green"
+    RED = "red"
+    BLACK = "black"
+    GOLD = "gold"
 
 class Token(BaseModel):
     color: str
@@ -35,3 +45,12 @@ class Player(BaseModel):
 class LevelDeck(BaseModel):
     cards: List[Card]
     available_count: int
+
+class TokenActionEnum(Enum):
+    RETURN = "return"
+    BUY = "buy"
+
+class TokenAction(BaseModel):
+    action: TokenActionEnum
+    color: str
+    count: int

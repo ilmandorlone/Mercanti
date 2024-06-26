@@ -8,7 +8,7 @@ from server.schemas import (
     ReserveCardActionSchema
 )
 from server.crud import (
-    load_cards, refill_visible_cards, refill_visible_passengers,
+    init_match,
     get_game_state_by_id, purchase_card, reserve_card,
     select_token
 )
@@ -43,10 +43,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup_event():
-    cards_file_path = os.path.join(os.path.dirname(__file__), "cards.json")
-    load_cards(cards_file_path)
-    refill_visible_cards()
-    refill_visible_passengers()
+    cards_file_path = os.path.join(os.path.dirname(__file__), "../core/setup.json")
+    init_match(cards_file_path)
     logger.info("Loaded cards and refilled visible cards")
 
 @app.get("/")
@@ -186,10 +184,8 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.info(f"WebSocket closed: {websocket.client}")
 
 def start_server(host: str, port: int):
-    cards_file_path = os.path.join(os.path.dirname(__file__), "cards.json")
-    load_cards(cards_file_path)
-    refill_visible_cards()
-    refill_visible_passengers()
+    cards_file_path = os.path.join(os.path.dirname(__file__), "../core/setup.json")
+    init_match(cards_file_path)
     logger.info("Loaded cards and refilled visible cards")
 
     logger.info(f"Starting server at http://{host}:{port}")
