@@ -1,3 +1,4 @@
+import time
 from typing import List
 import random
 import os
@@ -8,6 +9,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # Aggiungi il percorso al sys.path
 sys.path.append(project_root)
 
+from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
 from core.actions.action_purchase_card import ActionPurchaseCard
 from core.actions.action_select_tokens import ActionSelectTokens
@@ -19,10 +21,18 @@ from core.match import Match
 from core.models import TokenAction, TokenActionEnum, ColorEnum
 from core.provider import Provider, provider_instance
 
+# Conteggio volte che non ci sono azioni disponibili
+no_actions_count = 0
+
 # callback player play
 def player_move(match: Match, player: Player):
+    global no_actions_count
+
     # Ottiene tutte le azioni possibili per il giocatore
-    actions = get_all_possible_actions(match, player.id)
+    actions = get_all_possible_actions(match, player.id, enable_filer_purchase=True)
+
+    # Ottiene lo stato attuale del gioco per il giocatore
+    status_player = MatchHelper.get_game_state_by_id(match, player.id)
 
     # Stampa il round corrente
     print(f"Round: {match.round}")
@@ -32,7 +42,20 @@ def player_move(match: Match, player: Player):
     # Verifica se ci sono azioni disponibili
     if not actions:
         print(f"Player {player.name} has no available actions")
+        no_actions_count += 1
+        if no_actions_count >= 3:
+            raise Exception("No actions available")
         return
+    no_actions_count = 0
+    
+    # Simula tutte le azioni possibili in match virtuali
+    for action in actions:
+        # Simula l'azione e ottiene lo stato del gioco
+        #match_sim = action.simulate(match=match)
+
+        # Ottiene lo stato del gioco simulato per il giocatore
+        #status_player_sim = MatchHelper.get_game_state_by_id(match_sim, player.id)
+        pass
 
     # Esegue un'azione random tra quelle disponibili
     action = random.choice(actions)
@@ -59,23 +82,41 @@ def player_move(match: Match, player: Player):
 
     pass
 
-# Crea una lista di giocatori CPU
-players = [provider_instance.create_cpu_player(id=0, name="AI Player 1"),
-           provider_instance.create_cpu_player(id=1, name="AI Player 2"),
-           provider_instance.create_cpu_player(id=2, name="AI Player 3")]
+# Avvia il cronometro
+tart_time = time.perf_counter()
 
-# Crea una nuova partita
-match = Match(players)
-match.load_cards("backend/core/setup.json")
+# simula 10 partite
+for i in range(1000):
+    # Crea una lista di giocatori CPU
+    players = [provider_instance.create_cpu_player(id=0, name="AI Player 1"),
+               provider_instance.create_cpu_player(id=1, name="AI Player 2"),
+               provider_instance.create_cpu_player(id=2, name="AI Player 3")]
 
-players[0].set_callback_move(player_move)
-players[1].set_callback_move(player_move)
-players[2].set_callback_move(player_move)
+    # Crea una nuova partita
+    match = Match(players)
+    match.load_cards("backend/core/setup.json")
 
-# Avvia la partita e determina il vincitore
-winner = match.run()
+    players[0].set_callback_move(player_move)
+    players[1].set_callback_move(player_move)
+    players[2].set_callback_move(player_move)
 
-print(f"Winner is {winner.name} with {winner.points} points")
+    try:
+        # Avvia la partita e determina il vincitore
+        winner = match.run()
+    except Exception as e:
+        # Verifica se è stata sollevata un'eccezione per mancanza di azioni disponibili
+        if str(e) == "No actions available":
+            print("No actions available")
+        else:
+            raise e
+
+    print(f"Winner is {winner.name} with {winner.points} points")
+
+# Ferma il cronometro
+end_time = time.perf_counter()
+
+# Stampa il tempo impiegato
+print(f"Time elapsed: {end_time - tart_time} seconds")
 
 
 '''
