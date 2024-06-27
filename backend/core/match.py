@@ -108,6 +108,9 @@ class Match:
 
     def get_next_card_id_by_level(self, level: int):
         return self.select_deck_level_by_level(level)[0].id
+
+    def get_token_count_by_color(self, color: ColorEnum):
+        return next((t.count for t in self.tokens if t.color == color), 0)
     
     def run(self):
         winner = None
