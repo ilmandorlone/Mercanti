@@ -49,3 +49,52 @@ class MatchHelper:
                 return
         
         raise ValueError(f"Card with id {card.id} not found in visible cards")
+    
+    # Stato della partita per il giocatore con l'id specificato
+    @staticmethod
+    def get_game_state_by_id(match: Match, player_id: int):
+        main_player = None
+        opponents = []
+
+        for player in match.players:
+            # Se i dati dei giocatori sono inizializzati correttamente, non è necessario questo conteggio
+            cards_count = player.cards_count
+            
+            if player.id == player_id:
+                main_player = Player(
+                    id=player.id,
+                    name=player.name,
+                    cards_count=cards_count,
+                    tokens=player.tokens,
+                    reserved_cards=player.reserved_cards,
+                    reserved_cards_count=len(player.reserved_cards),
+                    points=player.points
+                )
+            else:
+                opponent = Player(
+                    id=player.id,
+                    name=player.name,
+                    cards_count=cards_count,
+                    tokens=player.tokens,
+                    reserved_cards=[],
+                    reserved_cards_count=len(player.reserved_cards),
+                    points=player.points
+                )
+                opponents.append(opponent)
+
+        if main_player is None:
+            raise ValueError(f"Player with id {player_id} not found")
+
+        return {
+            "player": main_player,
+            "opponents": opponents,
+            "tokens": match.tokens,
+            "remaining_cards": {
+                "level1": len(match.deck_level1),
+                "level2": len(match.deck_level2),
+                "level3": len(match.deck_level3)
+            },
+            "visible_level1": [Card(**card.dict()) for card in match.visible_level1],
+            "visible_level2": [Card(**card.dict()) for card in match.visible_level2],
+            "visible_level3": [Card(**card.dict()) for card in match.visible_level3]
+        }
