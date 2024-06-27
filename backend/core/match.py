@@ -118,7 +118,7 @@ class Match:
             for player in self.players:
                 # esegui la callback per ottenere l'azione del giocatore
                 # cast di player a CPUPlayer per chiamare la callback
-                player.callback_move(self, player.id)
+                player.callback_move(self, player)
 
                 # Verifica se il giocatore ha vinto
                 if player.points >= 15:

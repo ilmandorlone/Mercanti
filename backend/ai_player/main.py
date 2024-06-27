@@ -17,6 +17,7 @@ from core.cpu_player import CPUPlayer
 from core.models import Player
 from core.match import Match
 from core.models import TokenAction, TokenActionEnum, ColorEnum
+from core.provider import Provider, provider_instance
 
 # callback player play
 def player_move(match: Match, player: Player):
@@ -59,16 +60,13 @@ def player_move(match: Match, player: Player):
     pass
 
 # Crea una lista di giocatori CPU
-players = [CPUPlayer(id=0, name="AI Player 1"),
-           CPUPlayer(id=1, name="AI Player 2"),
-           CPUPlayer(id=2, name="AI Player 3")]
+players = [provider_instance.create_cpu_player(id=0, name="AI Player 1"),
+           provider_instance.create_cpu_player(id=1, name="AI Player 2"),
+           provider_instance.create_cpu_player(id=2, name="AI Player 3")]
 
 # Crea una nuova partita
 match = Match(players)
 match.load_cards("backend/core/setup.json")
-
-# Imposta la callback per il turno del giocatore
-match.set_player_move_callback(player_move)
 
 players[0].set_callback_move(player_move)
 players[1].set_callback_move(player_move)
@@ -78,9 +76,6 @@ players[2].set_callback_move(player_move)
 winner = match.run()
 
 print(f"Winner is {winner.name} with {winner.points} points")
-
-
-
 
 
 '''

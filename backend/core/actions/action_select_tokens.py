@@ -50,9 +50,12 @@ class ActionSelectTokens(Action):
         # Verifica che non ci siano gettoni "gold" tra quelli selezionati per l'acquisto o tra quelli restituiti
         if "gold" in buy_colors + return_colors:
             raise ValueError("Cannot buy or return gold tokens")
+        
+        # Calcola il numero di colori diversi selezionati per l'acquisto
+        colors_count = len(set(buy_colors))
 
         # Verifica se il giocatore ha selezionato 2 uguali
-        if total_tokens_to_buy == 2 and len(buy_colors) == 1:
+        if total_tokens_to_buy == 2 and colors_count == 1:
 
             # Il giocatore ha selezionato 2 gettoni dello stesso colore
             

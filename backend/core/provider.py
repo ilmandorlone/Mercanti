@@ -28,10 +28,10 @@ class Provider:
     def list_matches(self) -> Dict[int, Match]:
         return self.matches
     
-    def create_player(self, player_id: int, player_name: str) -> Player:
+    def create_player(self, id: int, name: str) -> Player:
         return Player(
-            id=player_id,
-            name=player_name,
+            id=id,
+            name=name,
             cards_count=[CardCount(color="violet", count=0), CardCount(color="blue", count=0),
                          CardCount(color="green", count=0), CardCount(color="red", count=0),
                          CardCount(color="black", count=0)],
@@ -42,10 +42,10 @@ class Provider:
             reserved_cards_count=0,
             points=0)
 
-    def create_cpu_player(self, player_id: int, player_name: str) -> CPUPlayer:
+    def create_cpu_player(self, id: int, name: str) -> CPUPlayer:
         return CPUPlayer(
-            id=player_id,
-            name=player_name,
+            id=id,
+            name=name,
             cards_count=[CardCount(color="violet", count=0), CardCount(color="blue", count=0),
                         CardCount(color="green", count=0), CardCount(color="red", count=0),
                         CardCount(color="black", count=0)],
