@@ -12,7 +12,6 @@ class ActionSelectTokens(Action):
         self.token_actions = token_actions
         self.match = match
 
-
     def _validate_actions(self):
         # Trova il giocatore nella partita
         player = MatchHelper.get_player_by_id(self.match, self.player_id)
@@ -124,3 +123,16 @@ class ActionSelectTokens(Action):
         
         # Aggiorna i gettoni del giocatore
         player.tokens = [Token(color=token.color, count=token.count) for token in player.tokens if token.count > 0]
+
+    # To string
+    def __str__(self):
+        # Crea una lista di colori e estende la stringa con il colore e il conteggio
+        token_actions_str = ", ".join([f"{action.color} {action.count}" for action in self.token_actions])
+
+        # Ritorna la stringa formattata
+        return f"action select tokens: {token_actions_str}"
+    
+    # To string
+    def __repr__(self):
+        return self.__str__()
+    
