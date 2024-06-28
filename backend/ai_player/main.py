@@ -36,16 +36,16 @@ def player_move(match: Match, player: Player):
     global no_actions_count
 
     # Ottiene tutte le azioni possibili per il giocatore
-    actions = get_all_possible_actions(match, player.id, enable_filer_purchase=True)
+    actions = get_all_possible_actions(match.context, player.id, enable_filer_purchase=True)
 
     # Verifica se ci sono azioni disponibili
     if not actions:
         raise Exception("No actions available")
     
     # Ottiene lo stato attuale del gioco per il giocatore
-    status_player = MatchHelper.get_game_state_by_id(match, player.id)
+    #status_player = MatchHelper.get_game_state_by_id(match, player.id)
     # Stampa lo stato del giocatore
-    print(status_player)
+    #print(status_player)
 
     '''
     # Stampa il round corrente

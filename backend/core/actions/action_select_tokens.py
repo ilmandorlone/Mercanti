@@ -1,21 +1,20 @@
 from collections import Counter
 from core.utils import Utils
 from core.match import Match
-from core.models import ListCardCount, TokenActionEnum
+from core.models import ContextMatch, TokenActionEnum
 from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
 
 # Implementazione della classe ActionSelectTokens che eredita da Action
 class ActionSelectTokens(Action):
-    def __init__(self, match: Match, player_id: int, token_actions):
-        super().__init__(player_id)
+    def __init__(self, context_match: ContextMatch, player_id: int, token_actions):
+        super().__init__(context_match=context_match, player_id=player_id)
         self.token_actions = token_actions
-        self.match = match
 
     def _validate_actions(self):
         # Trova il giocatore nella partita
-        player = MatchHelper.get_player_by_id(self.match, self.player_id)
+        player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
         
         # Lista di azioni di gettoni "buy" selezionate dal giocatore
         buy_actions = [action for action in self.token_actions if action.action == TokenActionEnum.BUY.value]
@@ -60,7 +59,7 @@ class ActionSelectTokens(Action):
             # Il giocatore ha selezionato 2 gettoni dello stesso colore
             
             # Verifica che ci siano almeno 4 gettoni disponibili di quel colore
-            available_token = Utils.get_value_of_object_from_name(self.match.context.tokens, buy_colors[0])
+            available_token = Utils.get_value_of_object_from_name(self.context_match.tokens, buy_colors[0])
             if not available_token or available_token < 4:
                 raise ValueError("There must be at least 4 tokens available of the selected color to buy 2")
         else:
@@ -72,7 +71,7 @@ class ActionSelectTokens(Action):
 
             # Verifica che per ogni colore selezionato ci siano almeno 1 gettone disponibile
             for color in buy_colors:
-                available_token = Utils.get_value_of_object_from_name(self.match.context.tokens, color)
+                available_token = Utils.get_value_of_object_from_name(self.context_match.tokens, color)
                 if not available_token or available_token < 1:
                     raise ValueError(f"There must be at least 1 token available of color {color} to buy 3")
 
@@ -92,14 +91,14 @@ class ActionSelectTokens(Action):
         self._validate_actions()
 
         # Trova il giocatore nella partita
-        player = MatchHelper.get_player_by_id(self.match, self.player_id)
+        player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
 
         # Processa ogni azione di gettone
         for action in self.token_actions:
             # Ottieni il contatore del gettone del giocatore
             player_token_value = Utils.get_value_of_object_from_name(player.tokens, action.color)
             # Ottieni il contatore del gettone del tavolo
-            table_token_value = Utils.get_value_of_object_from_name(self.match.context.tokens, action.color)
+            table_token_value = Utils.get_value_of_object_from_name(self.context_match.tokens, action.color)
 
             # Verifica se l'azione è di acquisto
             if action.action == TokenActionEnum.BUY.value:
@@ -116,7 +115,7 @@ class ActionSelectTokens(Action):
             # Aggiorna il gettone del giocatore
             Utils.set_value_of_object_from_name(player.tokens, action.color, player_token_value)
             # Aggiorna il gettone del tavolo
-            Utils.set_value_of_object_from_name(self.match.context.tokens, action.color, table_token_value)
+            Utils.set_value_of_object_from_name(self.context_match.tokens, action.color, table_token_value)
 
     # To string
     def __str__(self):

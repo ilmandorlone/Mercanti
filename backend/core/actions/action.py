@@ -2,9 +2,12 @@
 
 from copy import copy, deepcopy
 
+from core.models import ContextMatch
+
 
 class Action:
-    def __init__(self, player_id):
+    def __init__(self, context_match: ContextMatch, player_id: int):
+        self.context_match = context_match
         self.player_id = player_id
 
     def can_execute(self):

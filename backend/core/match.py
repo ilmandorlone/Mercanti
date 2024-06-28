@@ -7,15 +7,15 @@ from core.turn_manager import TurnManager
 from core.human_player import HumanPlayer
 from core.cpu_player import CPUPlayer
 from core.actions.action import Action
-from core.models import ColorEnum, ContexMatch, ListCardCount, ListTokenCount, Player, Card, Noble, TokenAction, TokenActionEnum
+from core.models import ColorEnum, ContextMatch, ListCardCount, ListTokenCount, Player, Card, Noble, TokenAction, TokenActionEnum
 import random
 
 logger = logging.getLogger(__name__)
 
 class Match:
     def __init__(self, players: List[Player]):
-        # ContexMatch
-        self.context = ContexMatch(
+        # ContextMatch
+        self.context = ContextMatch(
             players=players,
             tokens=ListTokenCount(),
             deck_level1=[],
@@ -90,20 +90,6 @@ class Match:
             self.context.visible_level2.append(self.context.deck_level2.pop(0))
         while len(self.context.visible_level3) < 4 and self.context.deck_level3:
             self.context.visible_level3.append(self.context.deck_level3.pop(0))
-
-    def check_and_assign_passenger(self, player):        
-        for passenger in self.context.visible_passengers:
-            # Verifica ha le carte necessarie per ottenere il nobile
-            if player.cards_count.violet >= passenger.cost.violet and \
-                player.cards_count.blue >= passenger.cost.blue and \
-                player.cards_count.green >= passenger.cost.green and \
-                player.cards_count.red >= passenger.cost.red and \
-                player.cards_count.black >= passenger.cost.black:
-
-                player.points += passenger.points
-                player.passengers.append(passenger)
-                self.context.visible_passengers.remove(passenger)
-                break
 
     def select_deck_level_by_level(self, level: int):
         if level == 1:

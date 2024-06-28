@@ -71,7 +71,7 @@ class Player():
         }
 
 @dataclass
-class ContexMatch():
+class ContextMatch():
     players: List[Player]
     tokens: ListTokenCount
     deck_level1: List[Card]

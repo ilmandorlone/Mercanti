@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import List
 from core.utils import Utils
-from core.models import Player, Card
+from core.models import ContextMatch, Player, Card
 from core.match import Match
 
 class PlayerHelper:
@@ -32,10 +32,9 @@ class PlayerHelper:
         # Verifica se i jolly possono coprire i gettoni mancanti
         return player.tokens.gold >= PlayerHelper.get_gold_tokens_to_use(player, card)
     
-    # Paga i gettoni necessari (considerando gli sconti) o jolly per acquistare la carta e restituiscili al tavolo
+    # Paga i gettoni necessari (considerando gli sconti) o jolly per acquistare la carta e restituiscili al tavolo nel contesto della partita
     @staticmethod
-    def pay_tokens(player: Player, card: Card, match: Match):
-
+    def pay_tokens_in_context(context_match: ContextMatch, player: Player, card: Card):
         # Gettoni 'gold' necessari
         needed_gold = PlayerHelper.get_gold_tokens_to_use(player, card)
 
@@ -52,12 +51,12 @@ class PlayerHelper:
         gold_after = max(0, player.tokens.gold - needed_gold)
 
         # Aggiungi i gettoni pagati al tavolo
-        match.context.tokens.violet += player.tokens.violet - violet_after
-        match.context.tokens.blue += player.tokens.blue - blue_after
-        match.context.tokens.green += player.tokens.green - green_after
-        match.context.tokens.red += player.tokens.red - red_after
-        match.context.tokens.black += player.tokens.black - black_after
-        match.context.tokens.gold += player.tokens.gold - gold_after
+        context_match.tokens.violet += player.tokens.violet - violet_after
+        context_match.tokens.blue += player.tokens.blue - blue_after
+        context_match.tokens.green += player.tokens.green - green_after
+        context_match.tokens.red += player.tokens.red - red_after
+        context_match.tokens.black += player.tokens.black - black_after
+        context_match.tokens.gold += player.tokens.gold - gold_after
 
         # Aggiorna i gettoni del giocatore
         player.tokens.violet = violet_after
@@ -66,6 +65,11 @@ class PlayerHelper:
         player.tokens.red = red_after
         player.tokens.black = black_after
         player.tokens.gold = gold_after
+
+    # Paga i gettoni necessari (considerando gli sconti) o jolly per acquistare la carta e restituiscili al tavolo
+    @staticmethod
+    def pay_tokens(player: Player, card: Card, match: Match):
+        PlayerHelper.pay_tokens_in_context(match.context, player, card)
 
     # Aggiungi la carta al giocatore e assegna i punti
     @staticmethod
@@ -85,6 +89,21 @@ class PlayerHelper:
         
         # Aggiorna il conteggio delle carte riservate
         player.reserved_cards_count += 1
+
+    # Aggiungi un gettone "gold" al giocatore se disponibile e se non ha già 10 gettoni nel contesto della partita
+    @staticmethod
+    def add_gold_token_to_player_in_context(context_match: ContextMatch, player: Player):
+        # Verifica che il giocatore non abbia più di 10 gettoni
+        if PlayerHelper.get_sum_tokens(player) >= 10:
+            return
+
+        # Verifica se ci sono gettoni "gold" disponibili
+        if context_match.tokens.gold > 0:
+            # Aggiungi il gettone "gold" al giocatore
+            player.tokens.gold += 1
+
+            # Rimuovi il gettone "gold" dal tavolo
+            context_match.tokens.gold -= 1
     
     # Aggiungi un gettone "gold" al giocatore se disponibile e se non ha già 10 gettoni
     @staticmethod

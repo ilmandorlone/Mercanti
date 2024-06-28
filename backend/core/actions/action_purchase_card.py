@@ -1,22 +1,22 @@
 from collections import Counter
 from core.match import Match
+from core.models import ContextMatch, ListCardCount, TokenActionEnum
 from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
 
 # Implementazione della classe ActionPurchaseCard che eredita da Action
 class ActionPurchaseCard(Action):
-    def __init__(self, match: Match, player_id, card_id):
-        super().__init__(player_id)
+    def __init__(self, context_match: ContextMatch, player_id: int, card_id: int):
+        super().__init__(context_match=context_match, player_id=player_id)
         self.card_id = card_id
-        self.match = match
 
     def can_execute(self):
         # Trova il giocatore nella partita
-        player = MatchHelper.get_player_by_id(self.match, self.player_id)
+        player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
 
         # Trova la carta nei livelli visibili o nelle carte riservate
-        card = MatchHelper.get_card_by_id(self.match, self.card_id)
+        card = MatchHelper.get_card_by_id_in_context(self.context_match, self.card_id)
 
         # Verifica che la carta sia stata trovata
         if not card:
@@ -30,10 +30,10 @@ class ActionPurchaseCard(Action):
 
     def execute(self):
         # Trova il giocatore nella partita
-        player = MatchHelper.get_player_by_id(self.match, self.player_id)
+        player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
 
         # Trova la carta nei livelli visibili o nelle carte riservate
-        card = MatchHelper.get_card_by_id(self.match, self.card_id)
+        card = MatchHelper.get_card_by_id_in_context(self.context_match, self.card_id)
 
         # Verifica che la carta sia stata trovata
         if not card:
@@ -44,18 +44,16 @@ class ActionPurchaseCard(Action):
             raise ValueError(f"Not enough tokens to purchase the card: {self.card_id}")
 
         # Paga i gettoni necessari (considerando gli sconti) o jolly per acquistare la carta e restituiscili al tavolo
-        PlayerHelper.pay_tokens(player, card, self.match)
+        PlayerHelper.pay_tokens_in_context(self.context_match, player, card)
 
         # Aggiungi la carta al giocatore e assegna i punti
         PlayerHelper.add_card_to_player(player, card)
 
         # Rimuovi la carta dalle carte riservate o dal livello visibile
-        MatchHelper.remove_card_from_visible_or_reserved(self.match, card)
+        MatchHelper.remove_card_from_visible_or_reserved_in_context(self.context_match, card)
 
         # Refill le carte visibili se necessario
-        self.match.refill_visible_cards()
+        MatchHelper.refill_visible_cards(self.context_match)
         
         # Verifica e assegna le tessere nobile
-        self.match.check_and_assign_passenger(player)
-
-        return self.match
+        MatchHelper.check_and_assign_noble(self.context_match, player)
