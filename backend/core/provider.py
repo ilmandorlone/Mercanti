@@ -1,6 +1,6 @@
 from core.actions.get_all_possible_actions import get_all_possible_actions
 from core.cpu_player import CPUPlayer
-from core.models import CardCount, Player, Token
+from core.models import ListCardCount, ListTokenCount, Player
 from core.match import Match
 from typing import Any, Dict
 import logging
@@ -32,12 +32,8 @@ class Provider:
         return Player(
             id=id,
             name=name,
-            cards_count=[CardCount(color="violet", count=0), CardCount(color="blue", count=0),
-                         CardCount(color="green", count=0), CardCount(color="red", count=0),
-                         CardCount(color="black", count=0)],
-            tokens=[Token(color="violet", count=0), Token(color="blue", count=0),
-                    Token(color="green", count=0), Token(color="red", count=0),
-                    Token(color="black", count=0), Token(color="gold", count=0)],
+            cards_count=ListCardCount(),
+            tokens=ListTokenCount(),
             reserved_cards=[],
             reserved_cards_count=0,
             points=0)
@@ -46,12 +42,8 @@ class Provider:
         return CPUPlayer(
             id=id,
             name=name,
-            cards_count=[CardCount(color="violet", count=0), CardCount(color="blue", count=0),
-                        CardCount(color="green", count=0), CardCount(color="red", count=0),
-                        CardCount(color="black", count=0)],
-            tokens=[Token(color="violet", count=0), Token(color="blue", count=0),
-                    Token(color="green", count=0), Token(color="red", count=0),
-                    Token(color="black", count=0), Token(color="gold", count=0)],
+            cards_count=ListCardCount(),
+            tokens=ListTokenCount(),
             reserved_cards=[],
             reserved_cards_count=0,
             points=0,
