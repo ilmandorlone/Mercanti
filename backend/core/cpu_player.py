@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Callable
 
 class CPUPlayer(Player):
-    callback_move: Optional[Callable[[dict], None]] = None
+    callback_move: None
     
     def set_callback_move(self, callback: Any):
         self.callback_move = callback
