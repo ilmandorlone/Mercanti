@@ -1,109 +1,78 @@
 from collections import Counter
 from typing import List
-from core.models import CardCount, Player, Card, Token
+from core.utils import Utils
+from core.models import Player, Card
 from core.match import Match
 
 class PlayerHelper:
+
+    # Ottieni il numero totale di gettoni del giocatore
+    @staticmethod
+    def get_sum_tokens(player: Player) -> int:
+        # Crea un contatore per i gettoni del giocatore {player.tokens.violet, player.tokens.blue, player.tokens.green, player.tokens.red, player.tokens.black, player.tokens.gold}
+        return sum(vars(player.tokens).values())
     
+    # Calcola quanti gettoni 'gold' deve usare il giocatore per acquistare la carta
+    @staticmethod
+    def get_gold_tokens_to_use(player: Player, card: Card) -> int:
+        missing_tokens = 0
+
+        # Calcola i gettoni mancanti considerando gli sconti
+        missing_tokens -= min(0, player.tokens.violet + player.cards_count.violet - card.cost.violet)
+        missing_tokens -= min(0, player.tokens.blue + player.cards_count.blue - card.cost.blue)
+        missing_tokens -= min(0, player.tokens.green + player.cards_count.green - card.cost.green)
+        missing_tokens -= min(0, player.tokens.red + player.cards_count.red - card.cost.red)
+        missing_tokens -= min(0, player.tokens.black + player.cards_count.black - card.cost.black)
+
+        return missing_tokens
+
     # Verifica che il giocatore abbia abbastanza gettoni per acquistare la carta (considerando gli sconti) o abbia abbastanza jolly
     @staticmethod
     def has_enough_tokens(player: Player, card: Card) -> bool:
-        # Crea un contatore per i gettoni del giocatore
-        token_counter = Counter({token.color: token.count for token in player.tokens})
-
-        # Crea un contatore per gli sconti basati sulle carte possedute
-        discount_counter = Counter({count.color: count.count for count in player.cards_count})
-        
-        # Calcola i gettoni mancanti considerando gli sconti
-        missing_tokens = 0
-        for cost in card.cost:
-            # Calcola il costo effettivo considerando gli sconti
-            effective_cost = max(0, cost.count - discount_counter[cost.color])
-
-            # Verifica se il giocatore ha abbastanza gettoni
-            if token_counter[cost.color] < effective_cost:
-                missing_tokens += effective_cost - token_counter[cost.color]
-        
         # Verifica se i jolly possono coprire i gettoni mancanti
-        return missing_tokens <= token_counter['gold']
+        return player.tokens.gold >= PlayerHelper.get_gold_tokens_to_use(player, card)
     
     # Paga i gettoni necessari (considerando gli sconti) o jolly per acquistare la carta e restituiscili al tavolo
     @staticmethod
     def pay_tokens(player: Player, card: Card, match: Match):
-        needed_gold = 0
 
-        # Crea un contatore per i gettoni del giocatore
-        token_counter = Counter({token.color: token.count for token in player.tokens})
-        
-        # Crea un contatore per gli sconti basati sulle carte possedute
-        discount_counter = Counter({count.color: count.count for count in player.cards_count})
+        # Gettoni 'gold' necessari
+        needed_gold = PlayerHelper.get_gold_tokens_to_use(player, card)
 
         # Verifica che il giocatore abbia abbastanza gettoni per acquistare la carta (considerando gli sconti) o abbia abbastanza jolly
-        if not PlayerHelper.has_enough_tokens(player, card):
+        if player.tokens.gold < needed_gold:
             raise ValueError(f"Not enough tokens to purchase the card: {card.id}")
         
-        # Lista dei gettoni pagati dal giocatore
-        paid_tokens : List[Token] = []
-        
-        # Deduce il costo dai gettoni del giocatore
-        for cost in card.cost:
-            # Calcola il costo effettivo considerando gli sconti
-            effective_cost = max(0, cost.count - discount_counter[cost.color])
-
-            # Deduce il costo dai gettoni del giocatore
-            if token_counter[cost.color] >= effective_cost:
-                # Deduce i gettoni necessari
-                token_counter[cost.color] -= effective_cost
-
-                # Aggiungi i gettoni pagati alla lista
-                paid_tokens.append(Token(color=cost.color, count=effective_cost))
-            else:
-                # Paga con i gettoni disponibili e il resto con i gettoni gold
-                needed_gold = effective_cost - token_counter[cost.color]
-
-                # Aggiungi i gettoni pagati alla lista
-                paid_tokens.append(Token(color=cost.color, count=token_counter[cost.color]))
-
-                # Azzera i gettoni del colore
-                token_counter[cost.color] = 0
-
-                # Deduce i gettoni gold necessari
-                token_counter['gold'] -= needed_gold
-
-                # Aggiungi i gettoni gold pagati alla lista
-                # Verifica se è già presente un gettone gold nella lista dei gettoni pagati e aggiorna il conteggio
-                gold_token = next((t for t in paid_tokens if t.color == 'gold'), None)
-                if gold_token:
-                    gold_token.count += needed_gold
-                else:
-                    paid_tokens.append(Token(color='gold', count=needed_gold))
-
-        # Aggiorna i gettoni del giocatore
-        player.tokens = [Token(color=color, count=max(count, 0)) for color, count in token_counter.items()]
+        # Calcola i gettoni che restano al giocatore dopo l'acquisto
+        violet_after = max(0, player.tokens.violet - max(0, card.cost.violet - player.cards_count.violet))
+        blue_after = max(0, player.tokens.blue - max(0, card.cost.blue - player.cards_count.blue))
+        green_after = max(0, player.tokens.green - max(0, card.cost.green - player.cards_count.green))
+        red_after = max(0, player.tokens.red - max(0, card.cost.red - player.cards_count.red))
+        black_after = max(0, player.tokens.black - max(0, card.cost.black - player.cards_count.black))
+        gold_after = max(0, player.tokens.gold - needed_gold)
 
         # Aggiungi i gettoni pagati al tavolo
-        for paid_token in paid_tokens:
-            table_token = next((t for t in match.tokens if t.color == paid_token.color), None)
-            
-            if table_token:
-                table_token.count += paid_token.count
-            else:
-                match.tokens.append(Token(color=paid_token.color, count=paid_token.count))
+        match.context.tokens.violet += player.tokens.violet - violet_after
+        match.context.tokens.blue += player.tokens.blue - blue_after
+        match.context.tokens.green += player.tokens.green - green_after
+        match.context.tokens.red += player.tokens.red - red_after
+        match.context.tokens.black += player.tokens.black - black_after
+        match.context.tokens.gold += player.tokens.gold - gold_after
+
+        # Aggiorna i gettoni del giocatore
+        player.tokens.violet = violet_after
+        player.tokens.blue = blue_after
+        player.tokens.green = green_after
+        player.tokens.red = red_after
+        player.tokens.black = black_after
+        player.tokens.gold = gold_after
 
     # Aggiungi la carta al giocatore e assegna i punti
     @staticmethod
     def add_card_to_player(player: Player, card: Card):
-        # Aggiungi la carta al giocatore
-        found = False
-        for card_count in player.cards_count:
-            if card_count.color == card.color:
-                card_count.count += 1
-                found = True
-                break
-
-        # Aggiungi un nuovo conteggio per la carta se non è già presente
-        if not found:
-            player.cards_count.append(CardCount(color=card.color, count=1))
+        # Aggiungi il conteggio delle carte possedute
+        current_value = getattr(player.cards_count, card.color)
+        setattr(player.cards_count, card.color, current_value + 1)
 
         # Aggiungi i punti al giocatore
         player.points += card.points
@@ -121,17 +90,13 @@ class PlayerHelper:
     @staticmethod
     def add_gold_token_to_player(player: Player, match: Match):
         # Verifica che il giocatore non abbia più di 10 gettoni
-        if len(player.tokens) >= 10:
+        if Utils.sum_object_attributes(player.tokens) >= 10:
             return
 
         # Verifica se ci sono gettoni "gold" disponibili
-        gold_token = next((t for t in match.tokens if t.color == 'gold' and t.count > 0), None)
-        
-        # Aggiungi il gettone "gold" al giocatore
-        if gold_token:
-            gold_token.count -= 1
-            player_gold_token = next((t for t in player.tokens if t.color == 'gold'), None)
-            if player_gold_token:
-                player_gold_token.count += 1
-            else:
-                player.tokens.append(Token(color='gold', count=1))
+        if match.context.tokens.gold > 0:
+            # Aggiungi il gettone "gold" al giocatore
+            player.tokens.gold += 1
+
+            # Rimuovi il gettone "gold" dal tavolo
+            match.context.tokens.gold -= 1
