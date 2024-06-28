@@ -3,7 +3,7 @@ import logging
 from fastapi import WebSocket
 
 from core.match import Match
-from core.models import Card, Passenger, Player
+from core.models import Card, Noble, Player
 from core.provider import provider_instance
 
 logger = logging.getLogger(__name__)
@@ -12,15 +12,12 @@ def get_game_state_by_id(player_id: int):
     main_player = None
     opponents = []
 
-    for player in provider_instance.current_match.players:
-        # Se i dati dei giocatori sono inizializzati correttamente, non è necessario questo conteggio
-        cards_count = player.cards_count
-        
+    for player in provider_instance.current_match.context.deck_level3:        
         if player.id == player_id:
             main_player = Player(
                 id=player.id,
                 name=player.name,
-                cards_count=cards_count,
+                cards_count=player.cards_count,
                 tokens=player.tokens,
                 reserved_cards=player.reserved_cards,
                 reserved_cards_count=len(player.reserved_cards),
@@ -30,7 +27,7 @@ def get_game_state_by_id(player_id: int):
             opponent = Player(
                 id=player.id,
                 name=player.name,
-                cards_count=cards_count,
+                cards_count=player.cards_count,
                 tokens=player.tokens,
                 reserved_cards=[],
                 reserved_cards_count=len(player.reserved_cards),
@@ -44,16 +41,16 @@ def get_game_state_by_id(player_id: int):
     return {
         "player": main_player,
         "opponents": opponents,
-        "tokens": provider_instance.current_match.tokens,
+        "tokens": provider_instance.current_match.context.tokens,
         "remaining_cards": {
-            "level1": len(provider_instance.current_match.deck_level1),
-            "level2": len(provider_instance.current_match.deck_level2),
-            "level3": len(provider_instance.current_match.deck_level3)
+            "level1": len(provider_instance.current_match.context.deck_level1),
+            "level2": len(provider_instance.current_match.context.deck_level2),
+            "level3": len(provider_instance.current_match.context.deck_level3)
         },
-        "visible_level1": [Card(**card.dict()) for card in provider_instance.current_match.visible_level1],
-        "visible_level2": [Card(**card.dict()) for card in provider_instance.current_match.visible_level2],
-        "visible_level3": [Card(**card.dict()) for card in provider_instance.current_match.visible_level3],
-        "visible_passengers": [Passenger(**passenger.dict()) for passenger in provider_instance.current_match.visible_passengers],
+        "visible_level1": [Card(**card.dict()) for card in provider_instance.current_match.context.visible_level1],
+        "visible_level2": [Card(**card.dict()) for card in provider_instance.current_match.context.visible_level2],
+        "visible_level3": [Card(**card.dict()) for card in provider_instance.current_match.context.visible_level3],
+        "visible_passengers": [Noble(**passenger.dict()) for passenger in provider_instance.current_match.context.visible_passengers],
     }
 
 def generate_game_state_dict(player_id: int):
