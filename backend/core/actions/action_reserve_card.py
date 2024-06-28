@@ -1,6 +1,6 @@
 from collections import Counter
 from core.match import Match
-from core.models import CardCount, Token
+from core.models import ListCardCount
 from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
@@ -26,7 +26,7 @@ class ActionReserveCard(Action):
         # Verifica che la carta sia stata trovata
         if not card:
             # Verifica se la carta è la prima tra i mazzi nascosti
-            for level in [self.match.deck_level1, self.match.deck_level2, self.match.deck_level3]:
+            for level in [self.match.context.deck_level1, self.match.context.deck_level2, self.match.context.deck_level3]:
                 if level and level[0].id == self.card_id:
                     return True
     
@@ -48,10 +48,12 @@ class ActionReserveCard(Action):
         if card:
             # Rimuovi la carta dai livelli visibili
             MatchHelper.remove_card_from_visible(self.match, card)
+
+            # Refill le carte visibili se necessario
             self.match.refill_visible_cards()
         else:
             # Verifica se la carta è la prima tra i mazzi nascosti
-            for level in [self.match.deck_level1, self.match.deck_level2, self.match.deck_level3]:
+            for level in [self.match.context.deck_level1, self.match.context.deck_level2, self.match.context.deck_level3]:
                 # Verifica che ci siano carte disponibili nel mazzo
                 if level and level[0].id == self.card_id:
                     # Riserva la prima carta del mazzo nascosto
