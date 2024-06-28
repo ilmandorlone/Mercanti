@@ -6,10 +6,6 @@ class TokenSchema(BaseModel):
     color: str
     count: int
 
-class CardCountSchema(BaseModel):
-    color: str
-    count: int
-
 class CardSchema(BaseModel):
     id: int
     level: int
@@ -17,20 +13,27 @@ class CardSchema(BaseModel):
     cost: List[TokenSchema]
     points: int
 
-class PassengerSchema(BaseModel):
+class ListCardCountSchema(BaseModel):
+    violet: int = 0
+    blue: int = 0
+    green: int = 0
+    red: int = 0
+    black: int = 0
+
+class NobleSchema(BaseModel):
     id: int
-    cost: List[TokenSchema]
+    cost: ListCardCountSchema
     points: int
 
 class PlayerSchema(BaseModel):
     id: int
     name: str
-    cards_count: List[CardCountSchema]
+    cards_count: ListCardCountSchema = ListCardCountSchema(violet=0, blue=0, green=0, red=0, black=0)
     tokens: List[TokenSchema]
     reserved_cards: List[CardSchema]
     reserved_cards_count: int
     points: int
-    passengers: List[PassengerSchema] = []
+    passengers: List[NobleSchema] = []
 
 class LevelDeckSchema(BaseModel):
     cards: List[CardSchema]
@@ -43,7 +46,7 @@ class GameStateSchema(BaseModel):
     level1_deck: LevelDeckSchema
     level2_deck: LevelDeckSchema
     level3_deck: LevelDeckSchema
-    visible_passengers: List[PassengerSchema]
+    visible_passengers: List[NobleSchema]
 
 class SelectTokenActionSchema(BaseModel):
     action: str
