@@ -4,14 +4,13 @@ from core.actions.get_all_possible_actions import get_all_possible_actions
 from core.actions.action_select_tokens import ActionSelectTokens
 from core.actions.action_purchase_card import ActionPurchaseCard
 from core.actions.action_reserve_card import ActionReserveCard
-from core.models import Player, Card, Token, LevelDeck, CardCount, Passenger
-from .schemas import CardSchema, TokenSchema, TokenActionSchema, PassengerSchema
+from core.models import Player, Card, Token, LevelDeck, ListCardCount, Noble
+from .schemas import CardSchema, TokenSchema, TokenActionSchema, NobleSchema
 import json
 import random
 from collections import Counter
 import logging
 from core.provider import provider_instance
-from core.models import Player, Card, Token, Passenger
 from core.match import Match
 from server.connection_manager import connection_manager
 
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 def init_match(file_path: str):
 
     human_player = provider_instance.create_player(1, "Player 1")
-    cpu_player = provider_instance.create_cpu_player(player_id=2, player_name="Player 2 CPU")
+    cpu_player = provider_instance.create_player(player_id=2, player_name="Player 2 CPU")
     players = [ human_player, cpu_player ]
     
     provider_instance.current_match = provider_instance.new_match(players)
