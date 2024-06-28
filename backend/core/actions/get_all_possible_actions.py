@@ -2,36 +2,30 @@
 from itertools import combinations
 from typing import List
 
+from core.utils import Utils
 from core.helpers.match_helper import MatchHelper
-from core.models import ColorEnum, Player, TokenActionEnum, TokenAction, Token, Card, Passenger
+from core.models import ColorEnum, Player, TokenActionEnum, TokenAction, Card, Noble
 
 from core.actions.action_purchase_card import ActionPurchaseCard
 from core.actions.action_select_tokens import ActionSelectTokens
 from core.actions.action_reserve_card import ActionReserveCard
 from core.actions.action import Action
 
-def convert_tokens_to_limited_list(tokens: List[Token], max_per_color: int) -> List[str]:
-    return [
-        token.color
-        for token in tokens if token.color != 'gold'
-        for _ in range(min(token.count, max_per_color))
-    ]
-
 # Tutte le combinazioni delle azioni possibili per i gettoni (3 o 2 diversi, 2 uguali, o 1 solo) senza possibilità di restituzione
 def _get_all_possible_token_actions_without_return(match, player_id):
     actions = []
 
     # Filtra i colori per escludere "GOLD"
-    filtered_colors = [color for color in ColorEnum if color != ColorEnum.GOLD]
+    filtered_colors = [color.value for color in ColorEnum if color != ColorEnum.GOLD]
 
-    # Filtra i colori che hanno almeno un gettone disponibile
-    filtered_colors = [color for color in filtered_colors if match.get_token_count_by_color(color) > 0]
+    # Filtra i colori che hanno almeno un gettone disponibile nel tavolo
+    filtered_colors = [color for color in filtered_colors if Utils.get_value_of_object_from_name(match.context.tokens, color) > 0]
 
     # Tockens del giocatore
     player_tokens = MatchHelper.get_player_by_id(match, player_id).tokens
 
     # Calcola il numero totale di gettoni del giocatore
-    player_tokens_count = sum(token.count for token in player_tokens)
+    player_tokens_count = Utils.sum_object_attributes(player_tokens)
 
     # Calcola il numero massimo di gettoni che il giocatore può selezionare senza superare 10 e massimo 3 per volta
     max_tokens_to_buy = min(3, 10 - player_tokens_count)
@@ -63,7 +57,7 @@ def _get_all_possible_token_actions_without_return(match, player_id):
     # Calcola tutte le combinazioni di 2 gettoni dello stesso colore
     for color in filtered_colors:
         # Verifica se ci sono almeno 4 gettoni disponibili di quel colore
-        if match.get_token_count_by_color(color) < 4:
+        if Utils.get_value_of_object_from_name(match.context.tokens, color) < 4:
             continue
 
         # Crea la lista di gettoni da acquistare
@@ -77,6 +71,7 @@ def _get_all_possible_token_actions_without_return(match, player_id):
 
     return actions
 
+'''
 # Tutte le combinazioni delle azioni possibili per i gettoni (3 o 2 diversi, 2 uguali, o 1 solo) con possibilità di restituzione
 def _get_all_possible_token_actions_with_return(match, player_id):
     actions = []
@@ -85,7 +80,7 @@ def _get_all_possible_token_actions_with_return(match, player_id):
     filtered_colors = [color for color in ColorEnum if color != ColorEnum.GOLD]
 
     # Filtra i colori che hanno almeno un gettone disponibile
-    filtered_colors = [color for color in filtered_colors if match.get_token_count_by_color(color) > 0]
+    filtered_colors = [color for color in filtered_colors if match.get_token_count_of_color(color) > 0]
 
     # Calcola tutte le combinazioni di 3, 2 e 1 gettoni di colori diversi
     for i in range(1, 4):
@@ -140,13 +135,14 @@ def _get_all_possible_token_actions_with_return(match, player_id):
             actions.append(action)
 
     return actions
+'''
 
 # Tutte le azioni acquistabili per le carte
 def _get_all_possible_purchase_card_actions(match, player_id):
     actions = []
 
     # Per ogni carta visibile, crea un'azione per acquistarla
-    for card in match.visible_level1 + match.visible_level2 + match.visible_level3:
+    for card in match.context.visible_level1 + match.context.visible_level2 + match.context.visible_level3:
         action = ActionPurchaseCard(match=match, player_id=player_id, card_id=card.id)
 
         # Verifica se l'azione può essere eseguita
@@ -174,7 +170,7 @@ def _get_all_possible_reserve_card_actions(match, player_id):
             actions.append(action)
     
     # Per ogni carta visibile, crea un'azione per riservarla
-    for card in match.visible_level1 + match.visible_level2 + match.visible_level3:
+    for card in match.context.visible_level1 + match.context.visible_level2 + match.context.visible_level3:
         action = ActionReserveCard(match=match, player_id=player_id, card_id=card.id)
 
         # Verifica se l'azione può essere eseguita
