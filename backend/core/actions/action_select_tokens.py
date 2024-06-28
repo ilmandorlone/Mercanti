@@ -1,6 +1,7 @@
 from collections import Counter
+from core.utils import Utils
 from core.match import Match
-from core.models import CardCount, Token, TokenActionEnum
+from core.models import ListCardCount, TokenActionEnum
 from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
@@ -36,7 +37,7 @@ class ActionSelectTokens(Action):
         total_tokens_diff = total_tokens_to_buy - total_tokens_to_return
 
         # Calcola il numero totale di gettoni del giocatore dopo l'azione
-        total_tokens_after_action = sum(token.count for token in player.tokens) + total_tokens_diff
+        total_tokens_after_action = Utils.sum_object_attributes(player.tokens) + total_tokens_diff
 
         # Verifica che la somma dei gettoni non superi 10
         if total_tokens_after_action > 10:
@@ -59,8 +60,8 @@ class ActionSelectTokens(Action):
             # Il giocatore ha selezionato 2 gettoni dello stesso colore
             
             # Verifica che ci siano almeno 4 gettoni disponibili di quel colore
-            available_token = next((t for t in self.match.tokens if t.color == buy_colors[0]), None)
-            if not available_token or available_token.count < 4:
+            available_token = Utils.get_value_of_object_from_name(self.match.context.tokens, buy_colors[0])
+            if not available_token or available_token < 4:
                 raise ValueError("There must be at least 4 tokens available of the selected color to buy 2")
         else:
             # Il giocatore ha selezionato 3 gettoni di colori diversi
@@ -71,8 +72,8 @@ class ActionSelectTokens(Action):
 
             # Verifica che per ogni colore selezionato ci siano almeno 1 gettone disponibile
             for color in buy_colors:
-                available_token = next((t for t in self.match.tokens if t.color == color), None)
-                if not available_token or available_token.count < 1:
+                available_token = Utils.get_value_of_object_from_name(self.match.context.tokens, color)
+                if not available_token or available_token < 1:
                     raise ValueError(f"There must be at least 1 token available of color {color} to buy 3")
 
             # Verifica che i colori siano tutti diversi
@@ -93,36 +94,29 @@ class ActionSelectTokens(Action):
         # Trova il giocatore nella partita
         player = MatchHelper.get_player_by_id(self.match, self.player_id)
 
-        # Processa ogni azione
+        # Processa ogni azione di gettone
         for action in self.token_actions:
-            table_token = next((t for t in self.match.tokens if t.color == action.color), None)
-            player_token = next((t for t in player.tokens if t.color == action.color), None)
+            # Ottieni il contatore del gettone del giocatore
+            player_token_value = Utils.get_value_of_object_from_name(player.tokens, action.color)
+            # Ottieni il contatore del gettone del tavolo
+            table_token_value = Utils.get_value_of_object_from_name(self.match.context.tokens, action.color)
 
+            # Verifica se l'azione è di acquisto
             if action.action == TokenActionEnum.BUY.value:
-                if table_token and table_token.count >= action.count:
-                    table_token.count -= action.count
-                    if player_token:
-                        player_token.count += action.count
-                    else:
-                        player.tokens.append(Token(color=action.color, count=action.count))
-                else:
-                    raise ValueError(f"Not enough tokens available for color {action.color}")
-
-            elif action.action == TokenActionEnum.RETURN.value:
-                if player_token and player_token.count >= action.count:
-                    player_token.count -= action.count
-                    if table_token:
-                        table_token.count += action.count
-                    else:
-                        self.match.tokens.append(Token(color=action.color, count=action.count))
-                else:
-                    raise ValueError(f"Not enough tokens to return for color {action.color}")
-
+                # Aggiungi il gettone al giocatore
+                player_token_value += action.count
+                # Rimuovi il gettone dal tavolo
+                table_token_value -= action.count
             else:
-                raise ValueError("Invalid action. Must be 'buy' or 'return'.")
-        
-        # Aggiorna i gettoni del giocatore
-        player.tokens = [Token(color=token.color, count=token.count) for token in player.tokens if token.count > 0]
+                # Rimuovi il gettone al giocatore
+                player_token_value -= action.count
+                # Aggiungi il gettone al tavolo
+                table_token_value += action.count
+
+            # Aggiorna il gettone del giocatore
+            Utils.set_value_of_object_from_name(player.tokens, action.color, player_token_value)
+            # Aggiorna il gettone del tavolo
+            Utils.set_value_of_object_from_name(self.match.context.tokens, action.color, table_token_value)
 
     # To string
     def __str__(self):
