@@ -4,7 +4,7 @@ from core.actions.get_all_possible_actions import get_all_possible_actions
 from core.actions.action_select_tokens import ActionSelectTokens
 from core.actions.action_purchase_card import ActionPurchaseCard
 from core.actions.action_reserve_card import ActionReserveCard
-from core.models import Player, Card, Token, LevelDeck, ListCardCount, Noble
+from core.models import Player, Card, LevelDeck, ListCardCount, Noble
 from .schemas import CardSchema, TokenSchema, TokenActionSchema, NobleSchema
 import json
 import random
@@ -19,8 +19,15 @@ logger = logging.getLogger(__name__)
 def init_match(file_path: str):
 
     human_player = provider_instance.create_player(1, "Player 1")
-    cpu_player = provider_instance.create_player(player_id=2, player_name="Player 2 CPU")
+    cpu_player = provider_instance.create_player(id=2, name="Player 2 CPU")
+
     players = [ human_player, cpu_player ]
+    # Filtra i giocatori CPU
+    cpu_players = [player for player in players if isinstance(player, CPUPlayer)]
+
+    # Per ogni giocatore CPU, inizializza il callback per l'esecuzione delle mosse
+    for cpu_player in cpu_players:
+        cpu_player.set_callback_move(move_callback)
     
     provider_instance.current_match = provider_instance.new_match(players)
     provider_instance.current_match.load_cards(file_path)
@@ -35,8 +42,6 @@ def init_match(file_path: str):
             action.execute()
         
         connection_manager.broadcast_game_state()
-
-    cpu_player.set_callback_move(move_callback)
 
 def purchase_card(player_id: int, card_id: int):
     # Verifica il turno del giocatore
