@@ -22,6 +22,8 @@ from core.match import Match
 from core.models import TokenAction, TokenActionEnum, ColorEnum
 from core.provider import Provider, provider_instance
 
+from ai_player.types import ListStatusBeforeAfterAction
+
 # Conteggio volte che non ci sono azioni disponibili
 no_actions_count = 0
 
@@ -46,6 +48,12 @@ def player_move(match: Match, player: Player):
     #status_player = MatchHelper.get_game_state_by_id(match, player.id)
     # Stampa lo stato del giocatore
     #print(status_player)
+
+    # Creo una lista per salvare lo stato prima e dopo l'azione per ogni azione possibile
+    st = ListStatusBeforeAfterAction(len(actions))
+    # Ottenere e stampare la dimensione della memoria allocata
+    allocated_size = st.get_allocated_size()
+    print(f"Memory allocated for cards_array: {allocated_size} bytes")
 
     '''
     # Stampa il round corrente
