@@ -93,12 +93,12 @@ class ActionPurchaseCard(Action):
         player_gold = max(0, player.tokens.gold - needed_gold)
 
         # Aggiorna i gettoni del giocatore
-        data_after['players'][0]['tokens_violet'][player.id - 1] = player_violet
-        data_after['players'][0]['tokens_blue'][player.id - 1] = player_blue
-        data_after['players'][0]['tokens_green'][player.id - 1] = player_green
-        data_after['players'][0]['tokens_red'][player.id - 1] = player_red
-        data_after['players'][0]['tokens_black'][player.id - 1] = player_black
-        data_after['players'][0]['tokens_gold'][player.id - 1] = player_gold
+        data_after['players'][0]['tokens_violet'][player.id] = player_violet
+        data_after['players'][0]['tokens_blue'][player.id] = player_blue
+        data_after['players'][0]['tokens_green'][player.id] = player_green
+        data_after['players'][0]['tokens_red'][player.id] = player_red
+        data_after['players'][0]['tokens_black'][player.id] = player_black
+        data_after['players'][0]['tokens_gold'][player.id] = player_gold
 
         # Calcola i gettoni del tavolo dopo l'acquisto
         data_after['tokens_violet'] = self.context_match.tokens.violet + player.tokens.violet - player_violet
@@ -109,33 +109,33 @@ class ActionPurchaseCard(Action):
         data_after['tokens_gold'] = self.context_match.tokens.gold + player.tokens.gold - player_gold
 
         # Aggiungi la carta al giocatore
-        data_after['players'][0]['cards_' + card.color][player.id - 1] += 1
+        data_after['players'][0]['cards_' + card.color][player.id] += 1
 
         # Aggiungi i punti al giocatore
-        data_after['players'][0]['points'][player.id - 1] += card.points
+        data_after['players'][0]['points'][player.id] += card.points
 
         # Aggiorna lo stato della carta
         if card.level == 1:
-            data_after['cards_level1'][0]['position'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id - 1
+            data_after['cards_level1'][0]['position'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id
         elif card.level == 2:
-            data_after['cards_level2'][0]['position'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id - 1
+            data_after['cards_level2'][0]['position'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id
         elif card.level == 3:
-            data_after['cards_level3'][0]['position'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id - 1
+            data_after['cards_level3'][0]['position'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id
         
         # Verifica e assegna le tessere nobile
         for noble in self.context_match.visible_passengers:
             # Verifica ha le carte necessarie per ottenere il nobile
-            if data_after['players'][0]['cards_violet'][player.id - 1] >= noble.cost.violet and \
-                data_after['players'][0]['cards_blue'][player.id - 1] >= noble.cost.blue and \
-                data_after['players'][0]['cards_green'][player.id - 1] >= noble.cost.green and \
-                data_after['players'][0]['cards_red'][player.id - 1] >= noble.cost.red and \
-                data_after['players'][0]['cards_black'][player.id - 1] >= noble.cost.black:
+            if data_after['players'][0]['cards_violet'][player.id] >= noble.cost.violet and \
+                data_after['players'][0]['cards_blue'][player.id] >= noble.cost.blue and \
+                data_after['players'][0]['cards_green'][player.id] >= noble.cost.green and \
+                data_after['players'][0]['cards_red'][player.id] >= noble.cost.red and \
+                data_after['players'][0]['cards_black'][player.id] >= noble.cost.black:
 
                 # Imposta lo stato del nobile come assegnato
-                data_after['nobles'][0]['position'][noble.id - 1] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + player.id - 1
+                data_after['nobles'][0]['position'][noble.id - 1] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + player.id
 
                 # Aggiungi i punti al giocatore
-                data_after['players'][0]['points'][player.id - 1] += noble.points
+                data_after['players'][0]['points'][player.id] += noble.points
 
                 break
 

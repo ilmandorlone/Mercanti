@@ -70,21 +70,37 @@ class AIUtils():
         game_state['tokens_black'] = context_match.tokens.black     # Gettoni black
         game_state['tokens_gold'] = context_match.tokens.gold       # Gettoni gold
 
-        # Imposta le informazioni dei giocatori
-        for player in context_match.players:
-            np_player = game_state['players'][0][player.id - 1]
-            np_player['tokens_violet'] = player.tokens.violet
-            np_player['tokens_blue'] = player.tokens.blue
-            np_player['tokens_green'] = player.tokens.green
-            np_player['tokens_red'] = player.tokens.red
-            np_player['tokens_black'] = player.tokens.black
-            np_player['tokens_gold'] = player.tokens.gold
-            np_player['cards_violet'] = player.cards_count.violet
-            np_player['cards_blue'] = player.cards_count.blue
-            np_player['cards_green'] = player.cards_count.green
-            np_player['cards_red'] = player.cards_count.red
-            np_player['cards_black'] = player.cards_count.black
-            np_player['points'] = player.points
+        # Imposta le informazioni del giocatore e imposto tutti i valori a -1 se non esiste il giocatore
+        for i in range(4):
+            # Verifico se in context_match.players è contenuto il giocatore con id = i
+            if any(player.id == i for player in context_match.players):
+                np_player = game_state['players'][0]
+                np_player['tokens_violet'][i] = player.tokens.violet
+                np_player['tokens_blue'][i] = player.tokens.blue
+                np_player['tokens_green'][i] = player.tokens.green
+                np_player['tokens_red'][i] = player.tokens.red
+                np_player['tokens_black'][i] = player.tokens.black
+                np_player['tokens_gold'][i] = player.tokens.gold
+                np_player['cards_violet'][i] = player.cards_count.violet
+                np_player['cards_blue'][i] = player.cards_count.blue
+                np_player['cards_green'][i] = player.cards_count.green
+                np_player['cards_red'][i] = player.cards_count.red
+                np_player['cards_black'][i] = player.cards_count.black
+                np_player['points'][i] = player.points
+            else:
+                np_player = game_state['players'][0]
+                np_player['tokens_violet'][i] = -1
+                np_player['tokens_blue'][i] = -1
+                np_player['tokens_green'][i] = -1
+                np_player['tokens_red'][i] = -1
+                np_player['tokens_black'][i] = -1
+                np_player['tokens_gold'][i] = -1
+                np_player['cards_violet'][i] = -1
+                np_player['cards_blue'][i] = -1
+                np_player['cards_green'][i] = -1
+                np_player['cards_red'][i] = -1
+                np_player['cards_black'][i] = -1
+                np_player['points'][i] = -1
 
         # Crea le strutture per le carte e i nobili con valori di default
         cards_level1 = np.zeros(40, dtype=dtype_status_card)
@@ -118,15 +134,15 @@ class AIUtils():
                 # Imposta lo stato delle carte acquistate dal giocatore
                 for card in _player.cards_purchased:
                     if card.level == 1:
-                        cards_level1['position'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id - 1
+                        cards_level1['position'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
                     elif card.level == 2:
-                        cards_level2['position'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id - 1
+                        cards_level2['position'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
                     elif card.level == 3:
-                        cards_level3['position'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id - 1
+                        cards_level3['position'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
                 
                 # Imposta lo stato dei nobili assegnati ai giocatore
                 for noble in _player.passengers:
-                    nobles['position'][noble.id - 1] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + _player.id - 1
+                    nobles['position'][noble.id - 1] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + _player.id
                 
         # Imposto lo stato dei nobili non ancora assegnati
         for noble in context_match.visible_passengers:
