@@ -161,7 +161,7 @@ class ActionSelectTokens(Action):
                 table_token_value += action.count
 
             # Aggiorna il gettone del giocatore
-            data_after['player']['tokens_' + action.color] = player_token_value
+            data_after['players'][0]['tokens_' + action.color][player.id - 1] = player_token_value
             # Aggiorna il gettone del tavolo
             data_after['tokens_' + action.color] = table_token_value
         

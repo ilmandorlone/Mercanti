@@ -94,8 +94,7 @@ dtype_status_game = np.dtype([
     ('tokens_red', np.uint8),                   # Gettoni rossi disponibili
     ('tokens_black', np.uint8),                 # Gettoni neri disponibili
     ('tokens_gold', np.uint8),                  # Gettoni oro disponibili
-    ('player', dtype_status_player),            # Giocatore attuale
-    ('opponents', (dtype_status_player, 3)),    # Avversari
+    ('players', (dtype_status_player, 4)),      # Giocatori
     ('cards_level1', (dtype_status_card, 40)),  # Carte di livello 1
     ('cards_level2', (dtype_status_card, 30)),  # Carte di livello 2
     ('cards_level3', (dtype_status_card, 20)),  # Carte di livello 3

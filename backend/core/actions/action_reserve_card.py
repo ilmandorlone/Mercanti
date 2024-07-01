@@ -116,11 +116,12 @@ class ActionReserveCard(Action):
             raise ValueError(f"Card with id {self.card_id} not found in visible cards or decks")
 
         # Aggiungi la carta al giocatore
-        data_after['player']['cards_' + card.color] += 1
+        data_after['players'][0]['cards_' + card.color][player.id - 1] += 1
 
         # Aggiungi un gettone "gold" al giocatore se disponibile e se non ha già 10 gettoni
         if self.context_match.tokens.gold > 0 and PlayerHelper.get_sum_tokens(player) < 10:
-            data_after['player']['tokens_' + ColorEnum.GOLD.value] += 1
+            data_after['players'][0]['tokens_' + ColorEnum.GOLD.value][player.id - 1] += 1
+            # Rimuovi un gettone "gold" dal tavolo
             data_after['tokens_' + ColorEnum.GOLD.value] -= 1
 
         # Aggiorna lo stato della carta

@@ -70,39 +70,21 @@ class AIUtils():
         game_state['tokens_black'] = context_match.tokens.black     # Gettoni black
         game_state['tokens_gold'] = context_match.tokens.gold       # Gettoni gold
 
-        # Imposta le informazioni del giocatore di turno
-        np_player = game_state['player']
-        np_player['tokens_violet'] = player.tokens.violet           # Gettoni violet del giocatore di turno
-        np_player['tokens_blue'] = player.tokens.blue                  # Gettoni blue del giocatore di turno
-        np_player['tokens_green'] = player.tokens.green                # Gettoni green del giocatore di turno
-        np_player['tokens_red'] = player.tokens.red                    # Gettoni red del giocatore di turno
-        np_player['tokens_black'] = player.tokens.black                # Gettoni black del giocatore di turno
-        np_player['tokens_gold'] = player.tokens.gold                  # Gettoni gold del giocatore di turno
-        np_player['cards_violet'] = player.cards_count.violet          # Carte violet del giocatore di turno
-        np_player['cards_blue'] = player.cards_count.blue              # Carte blue del giocatore di turno
-        np_player['cards_green'] = player.cards_count.green            # Carte green del giocatore di turno
-        np_player['cards_red'] = player.cards_count.red                # Carte red del giocatore di turno
-        np_player['cards_black'] = player.cards_count.black            # Carte black del giocatore di turno
-        np_player['points'] = player.points                            # Punti del giocatore di turno
-
-        # Imposta le informazioni dei giocatori avversari
-        opponents : List[Player] = [player for player in context_match.players if player.id != player.id]
-
-        # Imposta le informazioni dei giocatori avversari
-        for opponent in opponents:
-            np_opponent = game_state['opponents'][opponent.id - 1]
-            np_opponent['tokens_violet'] = opponent.tokens.violet
-            np_opponent['tokens_blue'] = opponent.tokens.blue
-            np_opponent['tokens_green'] = opponent.tokens.green
-            np_opponent['tokens_red'] = opponent.tokens.red
-            np_opponent['tokens_black'] = opponent.tokens.black
-            np_opponent['tokens_gold'] = opponent.tokens.gold
-            np_opponent['cards_violet'] = opponent.cards_count.violet
-            np_opponent['cards_blue'] = opponent.cards_count.blue
-            np_opponent['cards_green'] = opponent.cards_count.green
-            np_opponent['cards_red'] = opponent.cards_count.red
-            np_opponent['cards_black'] = opponent.cards_count.black
-            np_opponent['points'] = opponent.points
+        # Imposta le informazioni dei giocatori
+        for player in context_match.players:
+            np_player = game_state['players'][0][player.id - 1]
+            np_player['tokens_violet'] = player.tokens.violet
+            np_player['tokens_blue'] = player.tokens.blue
+            np_player['tokens_green'] = player.tokens.green
+            np_player['tokens_red'] = player.tokens.red
+            np_player['tokens_black'] = player.tokens.black
+            np_player['tokens_gold'] = player.tokens.gold
+            np_player['cards_violet'] = player.cards_count.violet
+            np_player['cards_blue'] = player.cards_count.blue
+            np_player['cards_green'] = player.cards_count.green
+            np_player['cards_red'] = player.cards_count.red
+            np_player['cards_black'] = player.cards_count.black
+            np_player['points'] = player.points
 
         # Crea le strutture per le carte e i nobili con valori di default
         cards_level1 = np.zeros(40, dtype=dtype_status_card)
@@ -154,6 +136,9 @@ class AIUtils():
         all_reserved_cards_visible_level1 = True
         all_reserved_cards_visible_level2 = True
         all_reserved_cards_visible_level3 = True
+
+        # Imposta le informazioni dei giocatori avversari
+        opponents : List[Player] = [player for player in context_match.players if player.id != player.id]
 
         # Imposta lo stato delle carte riservate dal giocatore avversario
         for opponent in opponents:
