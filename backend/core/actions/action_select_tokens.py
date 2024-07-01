@@ -88,7 +88,7 @@ class ActionSelectTokens(Action):
         except ValueError:
             return False
 
-    def execute_on_context(self, context_match: Match):
+    def execute_on_context(self, context_match: ContextMatch):
         # Verifica che le azioni siano valide
         self._validate_actions()
 

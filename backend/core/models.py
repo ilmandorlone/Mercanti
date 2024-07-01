@@ -27,11 +27,11 @@ class ListTokenCount():
 
 @dataclass
 class Card():
-    id: int
-    level: int
-    color: str
-    cost: ListTokenCount
-    points: int
+    id: int = 0
+    level: int = 0
+    color: str = ""
+    cost: ListTokenCount = None
+    points: int = 0
 
 @dataclass
 class ReservedCard():

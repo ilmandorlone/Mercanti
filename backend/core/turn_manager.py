@@ -5,7 +5,7 @@ from core.models import Player
 
 class TurnManager:
     def __init__(self, players: List[Player]):
-        self.current_player_id = 1
+        self.current_player_id = 0
         self.round = 0
         self.players = players
         self.winner = None
@@ -13,7 +13,7 @@ class TurnManager:
 
     def next_turn(self):
         # Player correspondente al turno attuale
-        current_player = self.players[self.current_player_id - 1]
+        current_player = self.players[self.current_player_id]
 
         # Se il giocatore è un CPU, esegue la mossa automaticamente
         if isinstance(current_player, CPUPlayer):
@@ -31,16 +31,16 @@ class TurnManager:
             raise ValueError(f"Player {player_id} is not the current player")
 
         # Incrementa il round
-        if player_id == 1:
+        if player_id == 0:
             self.round += 1
             print(f"Round: {self.round}")
 
         # Verifica se il giocatore ha vinto
-        if self.players[player_id - 1].points >= 15:
-            self.temp_winner = self.players[player_id - 1]
+        if self.players[player_id].points >= 15:
+            self.temp_winner = self.players[player_id]
         
         # Verifica se ha giocato l'ultimo giocatore
-        if self.temp_winner and self.current_player_id == len(self.players):
+        if self.temp_winner and self.current_player_id == len(self.players) - 1:
             # Trova il giocatore con il punteggio più alto
             max_points = max([player.points for player in self.players])
             self.winner = [player for player in self.players if player.points == max_points]
@@ -48,10 +48,15 @@ class TurnManager:
             return
 
         # Passa al prossimo turno
-        self.current_player_id = ((self.current_player_id) % len(self.players)) + 1
+        self.current_player_id = ((self.current_player_id + 1) % len(self.players))
 
         # Esegue il prossimo turno
         self.next_turn()
 
     def check_turn_id(self, player_id):
+        # Verifica se la partita è terminata
+        if self.temp_winner and self.current_player_id == len(self.players) - 1:
+            return False
+        
+        # Verifica il turno del giocatore
         return self.current_player_id == player_id

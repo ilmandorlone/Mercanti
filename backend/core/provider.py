@@ -11,7 +11,7 @@ class Provider:
     def __init__(self):
         self.matches: Dict[int, Match] = {}
         self.next_match_id = 0
-        self.current_match = None
+        self.current_match: Match = None
 
     def new_match(self, players: list[Player]) -> Match:
         match = self.matches[self.next_match_id] = Match(players)

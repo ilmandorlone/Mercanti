@@ -49,7 +49,7 @@ const WebSocketProvider = ({ children, playerId }) => {
 	};
 
 	useEffect(() => {
-		if (playerId) {
+		if (playerId !== null) {
 			connect(playerId);
 		}
 
@@ -78,7 +78,7 @@ const WebSocketProvider = ({ children, playerId }) => {
 	};
 
 	const retryConnection = () => {
-		if (!isOpen && playerId) {
+		if (!isOpen && playerId !== null) {
 			connect(playerId);
 		}
 	};

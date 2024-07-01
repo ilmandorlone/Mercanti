@@ -18,23 +18,19 @@ logger = logging.getLogger(__name__)
 
 def init_match(file_path: str):
 
-    human_player = provider_instance.create_player(1, "Player 1")
-    cpu_player = provider_instance.create_player(id=2, name="Player 2 CPU")
+    # Inizializza la lista dei giocatori
+    human_player = provider_instance.create_player(id=0, name="Player 1")
+    cpu_player = provider_instance.create_cpu_player(id=1, name="Player 2 CPU")
 
+    # Crea una lista di giocatori
     players = [ human_player, cpu_player ]
+
     # Filtra i giocatori CPU
     cpu_players = [player for player in players if isinstance(player, CPUPlayer)]
 
-    # Per ogni giocatore CPU, inizializza il callback per l'esecuzione delle mosse
-    for cpu_player in cpu_players:
-        cpu_player.set_callback_move(move_callback)
-    
-    provider_instance.current_match = provider_instance.new_match(players)
-    provider_instance.current_match.load_cards(file_path)
-
     def move_callback(player: Player):
         # Ottiene tutte le azioni possibili per il giocatore
-        actions = get_all_possible_actions(provider_instance.current_match, player.id)
+        actions = get_all_possible_actions(provider_instance.current_match.context, player.id)
 
         if actions:        
             # Esegue un'azione random tra quelle disponibili
@@ -43,13 +39,20 @@ def init_match(file_path: str):
         
         connection_manager.broadcast_game_state()
 
+    # Per ogni giocatore CPU, inizializza il callback per l'esecuzione delle mosse
+    for cpu_player in cpu_players:
+        cpu_player.set_callback_move(move_callback)
+    
+    provider_instance.current_match = provider_instance.new_match(players)
+    provider_instance.current_match.load_cards(file_path)
+
 def purchase_card(player_id: int, card_id: int):
     # Verifica il turno del giocatore
     if provider_instance.current_match.turn_manager.check_turn_id(player_id) is False:
         raise ValueError(f"Player with id {player_id} cannot play now")
 
     # Esegue l'azione di acquisto della carta
-    action = ActionPurchaseCard(provider_instance.current_match, player_id, card_id)
+    action = ActionPurchaseCard(provider_instance.current_match.context, player_id, card_id)
     action.execute()
 
     # Termina il turno del giocatore
@@ -70,7 +73,7 @@ def reserve_card(player_id: int, level: int, card_id: int):
         card_id = provider_instance.current_match.get_next_card_id_by_level(level)
 
     # Esegue l'azione di riserva della carta
-    action = ActionReserveCard(provider_instance.current_match, player_id, card_id)
+    action = ActionReserveCard(provider_instance.current_match.context, player_id, card_id)
     action.execute()
 
     # Termina il turno del giocatore
@@ -82,7 +85,7 @@ def select_token(player_id: int, token_actions: List[TokenActionSchema]):
         raise ValueError(f"Player with id {player_id} cannot play now")
     
     # Esegue l'azione di selezione dei token
-    action = ActionSelectTokens(provider_instance.current_match, player_id, token_actions)
+    action = ActionSelectTokens(provider_instance.current_match.context, player_id, token_actions)
     action.execute()
 
     # Termina il turno del giocatore

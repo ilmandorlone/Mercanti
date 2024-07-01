@@ -55,7 +55,7 @@ class ActionPurchaseCard(Action):
         PlayerHelper.add_card_to_player(player, card)
 
         # Rimuovi la carta dalle carte riservate o dal livello visibile
-        MatchHelper.remove_card_from_visible_or_reserved_in_context(context_match, card)
+        MatchHelper.remove_card_from_visible_or_reserved_in_context(context_match, player, card)
 
         # Refill le carte visibili se necessario
         MatchHelper.refill_visible_cards(context_match)

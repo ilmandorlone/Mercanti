@@ -23,7 +23,7 @@ class MatchHelper:
             # Verifica se la carta è tra le carte riservate del giocatore
             for card in player.reserved_cards:
                 if card.card.id == card_id:
-                    return card
+                    return card.card
             
             # Verifica se la carta è tra le carte visibili
             for level in [context_metch.visible_level1, context_metch.visible_level2, context_metch.visible_level3]:
@@ -39,13 +39,17 @@ class MatchHelper:
     
     # Rimuove la carta dalle carte visibili o dalle carte riservate nel contesto della partita
     @staticmethod
-    def remove_card_from_visible_or_reserved_in_context(context_metch: ContextMatch, card: Card):
-        for player in context_metch.players:
-            if card in player.reserved_cards:
-                # Rimuovi la carta dalle carte riservate del giocatore dove reserverd_card.card.id == card.id
-                player.reserved_cards.remove(reserved_card for reserved_card in player.reserved_cards if reserved_card.card.id == card.id)
-                player.reserved_cards_count -= 1
-                return
+    def remove_card_from_visible_or_reserved_in_context(context_metch: ContextMatch, player: Player, card: Card):
+        # Cerca la carta tra le carte riservate del giocatore
+        card_reserved = next((reserved_card for reserved_card in player.reserved_cards if reserved_card.card.id == card.id), None)
+
+        if card_reserved:
+            # Rimuovi la carta dalle carte riservate del giocatore dove reserverd_card.card.id == card.id
+            player.reserved_cards.remove(card_reserved)
+            player.reserved_cards_count -= 1
+            return
+        
+        # Cerca e rimuovi la carta dai livelli visibili
         for level in [context_metch.visible_level1, context_metch.visible_level2, context_metch.visible_level3]:
             if card in level:
                 level.remove(card)
@@ -55,7 +59,7 @@ class MatchHelper:
     
     # Rimuove la carta dalle carte visibili o dalle carte riservate
     @staticmethod
-    def remove_card_from_visible_or_reserved(match: Match, card: Card):
+    def remove_card_from_visible_or_reserved(match: Match, player: Player, card: Card):
         MatchHelper.remove_card_from_visible_or_reserved_in_context(match.context, card)
             
     # Rimuove la carta dai livelli visibili nel contesto della partita
@@ -111,50 +115,3 @@ class MatchHelper:
         else:
             raise ValueError(f"Invalid level {level}")
     
-    # Stato della partita per il giocatore con l'id specificato
-    @staticmethod
-    def get_game_state_by_id(match: Match, player_id: int):
-        main_player = None
-        opponents = []
-
-        for player in match.context.players:
-            
-            if player.id == player_id:
-                main_player = Player(
-                    id=player.id,
-                    name=player.name,
-                    cards_count=player.cards_count,
-                    tokens=player.tokens,
-                    reserved_cards=player.reserved_cards,
-                    reserved_cards_count=len(player.reserved_cards),
-                    points=player.points
-                )
-            else:
-                opponent = Player(
-                    id=player.id,
-                    name=player.name,
-                    cards_count=player.cards_count,
-                    tokens=player.tokens,
-                    reserved_cards=[],
-                    reserved_cards_count=len(player.reserved_cards),
-                    points=player.points
-                )
-                opponents.append(opponent)
-
-        if main_player is None:
-            raise ValueError(f"Player with id {player_id} not found")
-
-        return {
-            "player": main_player.to_dict(),
-            "opponents": [opponent.to_dict() for opponent in opponents],
-            "tokens": match.context.tokens,
-            "remaining_cards": {
-                "level1": len(match.context.deck_level1),
-                "level2": len(match.context.deck_level2),
-                "level3": len(match.context.deck_level3)
-            },
-            "visible_level1": match.context.visible_level1,
-            "visible_level2": match.context.visible_level2,
-            "visible_level3": match.context.visible_level3,
-            "visible_passengers": match.context.visible_passengers
-        }
