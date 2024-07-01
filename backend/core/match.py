@@ -1,5 +1,6 @@
 from itertools import combinations
 import json
+import os
 from typing import List
 from collections import Counter
 import logging
@@ -44,7 +45,12 @@ class Match:
         self.context.tokens.gold = token_init
 
     def load_cards(self, file_path: str, randomizer: random.Random = random.Random()):
-        with open(file_path, "r") as file:
+        # Ottiene la directory del punto di eseuzione del programma
+        dir_current = os.path.dirname(os.path.realpath(__file__))
+        # Directory assoluta del file setup.json
+        dir_file_path = os.path.join(dir_current, file_path)
+
+        with open(dir_file_path, "r") as file:
             data = json.load(file)
 
             def transform_card(card):

@@ -68,7 +68,7 @@ for i in range(100):
 
     # Crea una nuova partita
     match = Match(players)
-    match.load_cards("backend/core/setup.json", randomizer=randomizer)
+    match.load_cards("setup.json", randomizer=randomizer)
 
     players[0].set_callback_move(player_move)
     players[1].set_callback_move(player_move)

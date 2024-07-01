@@ -1,6 +1,6 @@
 import json
 from typing import List
-from ai_player.types import ( dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
+from ai_player.np_array_types import ( dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
                               dtype_status_player, dtype_noble, StatusCardEnum_NP, StatusNobleEnum_NP )
 from core.models import ContextMatch, Player
 

@@ -7,7 +7,7 @@ from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
 
-from ai_player.types import ( dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
+from ai_player.np_array_types import ( dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
                               dtype_status_player, dtype_noble, StatusCardEnum_NP, StatusNobleEnum_NP )
 
 # Implementazione della classe ActionPurchaseCard che eredita da Action
