@@ -34,6 +34,11 @@ class Card():
     points: int
 
 @dataclass
+class ReservedCard():
+    card: Card = None
+    reserved_from_visible: bool = False
+
+@dataclass
 class ListCardCount():
     violet: int = 0
     blue: int = 0
@@ -48,13 +53,14 @@ class Noble():
     points: int
 
 class Player():
-    def __init__(self, id: int, name: str, cards_count: ListCardCount, tokens: ListTokenCount, reserved_cards: List[Card], reserved_cards_count: int, points: int, passengers: List[Noble] = []):
+    def __init__(self, id: int, name: str, cards_count: ListCardCount, tokens: ListTokenCount, points: int, passengers: List[Noble] = []):
         self.id: int = id
         self.name: str = name
         self.cards_count: ListCardCount = cards_count
         self.tokens: ListTokenCount = tokens
-        self.reserved_cards: List[Card] = reserved_cards
-        self.reserved_cards_count: int = reserved_cards_count
+        self.cards_purchased: List[Card] = []
+        self.reserved_cards: List[ReservedCard] = []
+        self.reserved_cards_count: int = 0
         self.points: int = points
         self.passengers: List[Noble] = passengers
     
@@ -64,7 +70,8 @@ class Player():
             'name': self.name,
             'cards_count': asdict(self.cards_count) if is_dataclass(self.cards_count) else self.cards_count,
             'tokens': asdict(self.tokens) if is_dataclass(self.tokens) else self.tokens,
-            'reserved_cards': [asdict(card) if is_dataclass(card) else card for card in self.reserved_cards],
+            'cards_purchased': [asdict(card) if is_dataclass(card) else card for card in self.cards_purchased],
+            'reserved_cards': [asdict(reserved_card) if is_dataclass(reserved_card) else reserved_card for reserved_card in self.reserved_cards],
             'reserved_cards_count': self.reserved_cards_count,
             'points': self.points,
             'passengers': [asdict(noble) if is_dataclass(noble) else noble for noble in self.passengers]
@@ -72,16 +79,16 @@ class Player():
 
 @dataclass
 class ContextMatch():
-    players: List[Player]
-    tokens: ListTokenCount
-    deck_level1: List[Card]
-    deck_level2: List[Card]
-    deck_level3: List[Card]
-    visible_level1: List[Card]
-    visible_level2: List[Card]
-    visible_level3: List[Card]
-    visible_passengers: List[Noble]
-    round: int
+    players: List[Player] = None
+    tokens: ListTokenCount = None
+    deck_level1: List[Card] = None
+    deck_level2: List[Card] = None
+    deck_level3: List[Card] = None
+    visible_level1: List[Card] = None
+    visible_level2: List[Card] = None
+    visible_level3: List[Card] = None
+    visible_passengers: List[Noble] = None
+    round: int = 0
 
 @dataclass
 class LevelDeck():

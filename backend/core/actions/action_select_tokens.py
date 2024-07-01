@@ -1,4 +1,6 @@
 from collections import Counter
+
+import numpy as np
 from core.utils import Utils
 from core.match import Match
 from core.models import ContextMatch, TokenActionEnum
@@ -86,9 +88,55 @@ class ActionSelectTokens(Action):
         except ValueError:
             return False
 
-    def execute(self):
+    def execute_on_context(self, context_match: Match):
         # Verifica che le azioni siano valide
         self._validate_actions()
+
+        # Trova il giocatore nella partita
+        player = MatchHelper.get_player_by_id_in_context(context_match, self.player_id)
+
+        # Processa ogni azione di gettone
+        for action in self.token_actions:
+            # Ottieni il contatore del gettone del giocatore
+            player_token_value = Utils.get_value_of_object_from_name(player.tokens, action.color)
+            # Ottieni il contatore del gettone del tavolo
+            table_token_value = Utils.get_value_of_object_from_name(context_match.tokens, action.color)
+
+            # Verifica se l'azione è di acquisto
+            if action.action == TokenActionEnum.BUY.value:
+                # Aggiungi il gettone al giocatore
+                player_token_value += action.count
+                # Rimuovi il gettone dal tavolo
+                table_token_value -= action.count
+            else:
+                # Rimuovi il gettone al giocatore
+                player_token_value -= action.count
+                # Aggiungi il gettone al tavolo
+                table_token_value += action.count
+
+            # Aggiorna il gettone del giocatore
+            Utils.set_value_of_object_from_name(player.tokens, action.color, player_token_value)
+            # Aggiorna il gettone del tavolo
+            Utils.set_value_of_object_from_name(context_match.tokens, action.color, table_token_value)
+    
+    def execute(self):
+        self.execute_on_context(self.context_match)
+
+    # To string
+    def __str__(self):
+        # Crea una lista di colori e estende la stringa con il colore e il conteggio
+        token_actions_str = ", ".join([f"{action.color} {action.count}" for action in self.token_actions])
+
+        # Ritorna la stringa formattata
+        return f"action select tokens: {token_actions_str}"
+    
+    # To string
+    def __repr__(self):
+        return self.__str__()
+    
+    # Esegue l'azione su un array di dati
+    def execute_on_data_array(self, data: np.array):
+        data_after = np.copy(data)
 
         # Trova il giocatore nella partita
         player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
@@ -113,19 +161,8 @@ class ActionSelectTokens(Action):
                 table_token_value += action.count
 
             # Aggiorna il gettone del giocatore
-            Utils.set_value_of_object_from_name(player.tokens, action.color, player_token_value)
+            data_after['player']['tokens_' + action.color] = player_token_value
             # Aggiorna il gettone del tavolo
-            Utils.set_value_of_object_from_name(self.context_match.tokens, action.color, table_token_value)
-
-    # To string
-    def __str__(self):
-        # Crea una lista di colori e estende la stringa con il colore e il conteggio
-        token_actions_str = ", ".join([f"{action.color} {action.count}" for action in self.token_actions])
-
-        # Ritorna la stringa formattata
-        return f"action select tokens: {token_actions_str}"
-    
-    # To string
-    def __repr__(self):
-        return self.__str__()
-    
+            data_after['tokens_' + action.color] = table_token_value
+        
+        return data_after

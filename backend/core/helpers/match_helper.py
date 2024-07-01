@@ -22,7 +22,7 @@ class MatchHelper:
         for player in context_metch.players:
             # Verifica se la carta è tra le carte riservate del giocatore
             for card in player.reserved_cards:
-                if card.id == card_id:
+                if card.card.id == card_id:
                     return card
             
             # Verifica se la carta è tra le carte visibili
@@ -42,7 +42,8 @@ class MatchHelper:
     def remove_card_from_visible_or_reserved_in_context(context_metch: ContextMatch, card: Card):
         for player in context_metch.players:
             if card in player.reserved_cards:
-                player.reserved_cards.remove(card)
+                # Rimuovi la carta dalle carte riservate del giocatore dove reserverd_card.card.id == card.id
+                player.reserved_cards.remove(reserved_card for reserved_card in player.reserved_cards if reserved_card.card.id == card.id)
                 player.reserved_cards_count -= 1
                 return
         for level in [context_metch.visible_level1, context_metch.visible_level2, context_metch.visible_level3]:

@@ -1,7 +1,7 @@
 from collections import Counter
 from typing import List
 from core.utils import Utils
-from core.models import ContextMatch, Player, Card
+from core.models import ContextMatch, Player, Card, ReservedCard
 from core.match import Match
 
 class PlayerHelper:
@@ -80,12 +80,15 @@ class PlayerHelper:
 
         # Aggiungi i punti al giocatore
         player.points += card.points
+
+        # Aggiungi la carta al giocatore
+        player.cards_purchased.append(card)
     
     # Aggiungi una carta riservata al giocatore
     @staticmethod
-    def add_reserved_card_to_player(player: Player, card: Card):
+    def add_reserved_card_to_player(player: Player, reserved_card: ReservedCard):
         # Aggiungi la carta riservata al giocatore
-        player.reserved_cards.append(card)
+        player.reserved_cards.append(reserved_card)
         
         # Aggiorna il conteggio delle carte riservate
         player.reserved_cards_count += 1

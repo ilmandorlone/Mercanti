@@ -1,9 +1,14 @@
 from collections import Counter
+
+import numpy as np
 from core.match import Match
 from core.models import ContextMatch, ListCardCount, TokenActionEnum
 from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
+
+from ai_player.types import ( dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
+                              dtype_status_player, dtype_noble, StatusCardEnum_NP, StatusNobleEnum_NP )
 
 # Implementazione della classe ActionPurchaseCard che eredita da Action
 class ActionPurchaseCard(Action):
@@ -28,12 +33,12 @@ class ActionPurchaseCard(Action):
 
         return True
 
-    def execute(self):
+    def execute_on_context(self, context_match: ContextMatch):
         # Trova il giocatore nella partita
-        player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
+        player = MatchHelper.get_player_by_id_in_context(context_match, self.player_id)
 
         # Trova la carta nei livelli visibili o nelle carte riservate
-        card = MatchHelper.get_card_by_id_in_context(self.context_match, self.card_id)
+        card = MatchHelper.get_card_by_id_in_context(context_match, self.card_id)
 
         # Verifica che la carta sia stata trovata
         if not card:
@@ -44,16 +49,94 @@ class ActionPurchaseCard(Action):
             raise ValueError(f"Not enough tokens to purchase the card: {self.card_id}")
 
         # Paga i gettoni necessari (considerando gli sconti) o jolly per acquistare la carta e restituiscili al tavolo
-        PlayerHelper.pay_tokens_in_context(self.context_match, player, card)
+        PlayerHelper.pay_tokens_in_context(context_match, player, card)
 
         # Aggiungi la carta al giocatore e assegna i punti
         PlayerHelper.add_card_to_player(player, card)
 
         # Rimuovi la carta dalle carte riservate o dal livello visibile
-        MatchHelper.remove_card_from_visible_or_reserved_in_context(self.context_match, card)
+        MatchHelper.remove_card_from_visible_or_reserved_in_context(context_match, card)
 
         # Refill le carte visibili se necessario
-        MatchHelper.refill_visible_cards(self.context_match)
+        MatchHelper.refill_visible_cards(context_match)
         
         # Verifica e assegna le tessere nobile
-        MatchHelper.check_and_assign_noble(self.context_match, player)
+        MatchHelper.check_and_assign_noble(context_match, player)
+    
+    def execute(self):
+        return self.execute_on_context(self.context_match)
+    
+
+    # Esegue l'azione su un array di dati
+    def execute_on_data_array(self, data: np.array):
+        data_after = np.copy(data)
+
+        # Trova il giocatore nella partita
+        player = MatchHelper.get_player_by_id_in_context(self.context_match, self.player_id)
+
+        # Trova la carta nei livelli visibili o nelle carte riservate
+        card = MatchHelper.get_card_by_id_in_context(self.context_match, self.card_id)
+
+        # Verifica che la carta sia stata trovata
+        if not card:
+            raise ValueError(f"Card with id {self.card_id} not found in visible cards or reserved cards")
+
+        # Gettoni 'gold' necessari
+        needed_gold = PlayerHelper.get_gold_tokens_to_use(player, card)
+
+        # Calcola i gettoni che restano al giocatore dopo l'acquisto
+        player_violet = max(0, player.tokens.violet - max(0, card.cost.violet - player.cards_count.violet))
+        player_blue = max(0, player.tokens.blue - max(0, card.cost.blue - player.cards_count.blue))
+        player_green = max(0, player.tokens.green - max(0, card.cost.green - player.cards_count.green))
+        player_red = max(0, player.tokens.red - max(0, card.cost.red - player.cards_count.red))
+        player_black = max(0, player.tokens.black - max(0, card.cost.black - player.cards_count.black))
+        player_gold = max(0, player.tokens.gold - needed_gold)
+
+        # Aggiorna i gettoni del giocatore
+        data_after['player']['tokens_violet'] = player_violet
+        data_after['player']['tokens_blue'] = player_blue
+        data_after['player']['tokens_green'] = player_green
+        data_after['player']['tokens_red'] = player_red
+        data_after['player']['tokens_black'] = player_black
+        data_after['player']['tokens_gold'] = player_gold
+
+        # Calcola i gettoni del tavolo dopo l'acquisto
+        data_after['tokens_violet'] = self.context_match.tokens.violet + player.tokens.violet - player_violet
+        data_after['tokens_blue'] = self.context_match.tokens.blue + player.tokens.blue - player_blue
+        data_after['tokens_green'] = self.context_match.tokens.green + player.tokens.green - player_green
+        data_after['tokens_red'] = self.context_match.tokens.red + player.tokens.red - player_red
+        data_after['tokens_black'] = self.context_match.tokens.black + player.tokens.black - player_black
+        data_after['tokens_gold'] = self.context_match.tokens.gold + player.tokens.gold - player_gold
+
+        # Aggiungi la carta al giocatore
+        data_after['player']['cards_' + card.color] += 1
+
+        # Aggiungi i punti al giocatore
+        data_after['player']['points'] += card.points
+
+        # Aggiorna lo stato della carta
+        if card.level == 1:
+            data_after['cards_level1'][0]['position'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id - 1
+        elif card.level == 2:
+            data_after['cards_level2'][0]['position'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id - 1
+        elif card.level == 3:
+            data_after['cards_level3'][0]['position'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + player.id - 1
+        
+        # Verifica e assegna le tessere nobile
+        for noble in self.context_match.visible_passengers:
+            # Verifica ha le carte necessarie per ottenere il nobile
+            if data_after['player']['cards_violet'] >= noble.cost.violet and \
+                data_after['player']['cards_blue'] >= noble.cost.blue and \
+                data_after['player']['cards_green'] >= noble.cost.green and \
+                data_after['player']['cards_red'] >= noble.cost.red and \
+                data_after['player']['cards_black'] >= noble.cost.black:
+
+                # Imposta lo stato del nobile come assegnato
+                data_after['nobles'][0][noble.id - 1]['position'] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + player.id - 1
+
+                # Aggiungi i punti al giocatore
+                data_after['player']['points'] += noble.points
+
+                break
+
+        return data_after

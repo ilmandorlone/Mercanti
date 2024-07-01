@@ -34,8 +34,6 @@ class Provider:
             name=name,
             cards_count=ListCardCount(),
             tokens=ListTokenCount(),
-            reserved_cards=[],
-            reserved_cards_count=0,
             points=0)
 
     def create_cpu_player(self, id: int, name: str) -> CPUPlayer:
@@ -44,8 +42,6 @@ class Provider:
             name=name,
             cards_count=ListCardCount(),
             tokens=ListTokenCount(),
-            reserved_cards=[],
-            reserved_cards_count=0,
             points=0,
             passengers=[]
         )
