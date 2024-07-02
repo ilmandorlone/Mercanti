@@ -58,7 +58,7 @@ class AIUtils():
         '''
 
         # Crea un oggetto dtype_status_game
-        game_state = np.zeros(1, dtype=dtype_status_game)
+        game_state = np.zeros((), dtype=dtype_status_game)
 
         # Imposta lo stato del gioco generale
         game_state['round'] = context_match.round                   # Round
@@ -72,81 +72,75 @@ class AIUtils():
 
         # Imposta le informazioni del giocatore e imposto tutti i valori a -1 se non esiste il giocatore
         for i in range(4):
+            np_player = game_state['players'][i]
+
             # Verifico se in context_match.players è contenuto il giocatore con id = i
             if any(player.id == i for player in context_match.players):
-                np_player = game_state['players'][0]
-                np_player['tokens_violet'][i] = player.tokens.violet
-                np_player['tokens_blue'][i] = player.tokens.blue
-                np_player['tokens_green'][i] = player.tokens.green
-                np_player['tokens_red'][i] = player.tokens.red
-                np_player['tokens_black'][i] = player.tokens.black
-                np_player['tokens_gold'][i] = player.tokens.gold
-                np_player['cards_violet'][i] = player.cards_count.violet
-                np_player['cards_blue'][i] = player.cards_count.blue
-                np_player['cards_green'][i] = player.cards_count.green
-                np_player['cards_red'][i] = player.cards_count.red
-                np_player['cards_black'][i] = player.cards_count.black
-                np_player['points'][i] = player.points
+                np_player['tokens_violet'] = player.tokens.violet
+                np_player['tokens_blue'] = player.tokens.blue
+                np_player['tokens_green'] = player.tokens.green
+                np_player['tokens_red'] = player.tokens.red
+                np_player['tokens_black'] = player.tokens.black
+                np_player['tokens_gold'] = player.tokens.gold
+                np_player['cards_violet'] = player.cards_count.violet
+                np_player['cards_blue'] = player.cards_count.blue
+                np_player['cards_green'] = player.cards_count.green
+                np_player['cards_red'] = player.cards_count.red
+                np_player['cards_black'] = player.cards_count.black
+                np_player['points'] = player.points
             else:
-                np_player = game_state['players'][0]
-                np_player['tokens_violet'][i] = -1
-                np_player['tokens_blue'][i] = -1
-                np_player['tokens_green'][i] = -1
-                np_player['tokens_red'][i] = -1
-                np_player['tokens_black'][i] = -1
-                np_player['tokens_gold'][i] = -1
-                np_player['cards_violet'][i] = -1
-                np_player['cards_blue'][i] = -1
-                np_player['cards_green'][i] = -1
-                np_player['cards_red'][i] = -1
-                np_player['cards_black'][i] = -1
-                np_player['points'][i] = -1
-
-        # Crea le strutture per le carte e i nobili con valori di default
-        cards_level1 = np.zeros(40, dtype=dtype_status_card)
-        cards_level2 = np.zeros(30, dtype=dtype_status_card)
-        cards_level3 = np.zeros(20, dtype=dtype_status_card)
-        nobles = np.zeros(10, dtype=dtype_noble)
+                np_player['tokens_violet'] = 255
+                np_player['tokens_blue'] = 255
+                np_player['tokens_green'] = 255
+                np_player['tokens_red'] = 255
+                np_player['tokens_black'] = 255
+                np_player['tokens_gold'] = 255
+                np_player['cards_violet'] = 255
+                np_player['cards_blue'] = 255
+                np_player['cards_green'] = 255
+                np_player['cards_red'] = 255
+                np_player['cards_black'] = 255
+                np_player['points'] = 255
 
         # Imposta tutte le 40 carte del primo livello come UNKNOWN_LEVEL1
-        cards_level1['position'] = StatusCardEnum_NP.UNKNOWN_LEVEL1
+        game_state['cards_level1'] = StatusCardEnum_NP.UNKNOWN_LEVEL1
         # Imposta tutte le 30 carte del secondo livello come UNKNOWN_LEVEL2
-        cards_level2['position'] = StatusCardEnum_NP.UNKNOWN_LEVEL2
+        game_state['cards_level2'] = StatusCardEnum_NP.UNKNOWN_LEVEL2
         # Imposta tutte le 20 carte del terzo livello come UNKNOWN_LEVEL3
-        cards_level3['position'] = StatusCardEnum_NP.UNKNOWN_LEVEL3
+        game_state['cards_level3'] = StatusCardEnum_NP.UNKNOWN_LEVEL3
         # Imposta tutti i 10 nobili come UNASSIGNED
-        game_state['nobles']['position'] = StatusNobleEnum_NP.NOT_USED
+        game_state['nobles'] = StatusNobleEnum_NP.NOT_USED
 
         # Imposta lo stato delle carte visibili del primo livello come VISIBLE_LEVEL1
         for card in context_match.visible_level1:
-            cards_level1['position'][card.id - 1] = StatusCardEnum_NP.VISIBLE_LEVEL1
+            game_state['cards_level1'][card.id - 1] = StatusCardEnum_NP.VISIBLE_LEVEL1
         
         # Imposta lo stato delle carte visibili del secondo livello come VISIBLE_LEVEL2
         for card in context_match.visible_level2:
-            cards_level2['position'][card.id - 41] = StatusCardEnum_NP.VISIBLE_LEVEL2
+            game_state['cards_level2'][card.id - 41] = StatusCardEnum_NP.VISIBLE_LEVEL2
 
         # Imposta lo stato delle carte visibili del terzo livello come VISIBLE_LEVEL3
         for card in context_match.visible_level3:
-            cards_level3['position'][card.id - 71] = StatusCardEnum_NP.VISIBLE_LEVEL3
+            game_state['cards_level3'][card.id - 71] = StatusCardEnum_NP.VISIBLE_LEVEL3
 
         # Imposto tutte le carte acquistate e nobili assegnati dai giocatori
         for _player in context_match.players:
                 # Imposta lo stato delle carte acquistate dal giocatore
                 for card in _player.cards_purchased:
                     if card.level == 1:
-                        cards_level1['position'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
+                        game_state['cards_level1'][card.id - 1] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
                     elif card.level == 2:
-                        cards_level2['position'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
+                        game_state['cards_level2'][card.id - 41] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
                     elif card.level == 3:
-                        cards_level3['position'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
+                        game_state['cards_level3'][card.id - 71] = int(StatusCardEnum_NP.PURCHASED_PLAYER1) + _player.id
                 
                 # Imposta lo stato dei nobili assegnati ai giocatore
                 for noble in _player.passengers:
-                    nobles['position'][noble.id - 1] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + _player.id
+                    game_state['nobles'][noble.id - 1] = int(StatusNobleEnum_NP.ASSIGNED_PLAYER1) + _player.id
                 
         # Imposto lo stato dei nobili non ancora assegnati
         for noble in context_match.visible_passengers:
-            nobles['position'][noble.id - 1] = StatusNobleEnum_NP.UNASSIGNED
+            game_state['nobles'][noble.id - 1] = StatusNobleEnum_NP.UNASSIGNED
 
         # Variabile che indica se tutte le carte riservate dai giocatori avversari sono visibili
         all_reserved_cards_visible_level1 = True
@@ -170,35 +164,29 @@ class AIUtils():
                     continue
 
                 if reserved_card.card.level == 1:
-                    cards_level1['position'][reserved_card.card.id - 1] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + opponent.id - 1
+                    game_state['cards_level1'][reserved_card.card.id - 1] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + opponent.id
                 elif reserved_card.card.level == 2:
-                    cards_level2['position'][reserved_card.card.id - 41] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + opponent.id - 1
+                    game_state['cards_level2'][reserved_card.card.id - 41] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + opponent.id
                 elif reserved_card.card.level == 3:
-                    cards_level3['position'][reserved_card.card.id - 71] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + opponent.id - 1
+                    game_state['cards_level3'][reserved_card.card.id - 71] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + opponent.id
 
         # Se tutte le carte riservate dai giocatori avversari di livello 1 sono visibili
         if all_reserved_cards_visible_level1:
             # Imposta lo stato delle carte ancora disponibili nel mazzo livello 1
             for card in context_match.deck_level1:
-                cards_level1['position'][card.id - 1] = StatusCardEnum_NP.ON_DECK_LEVEL1
+                game_state['cards_level1'][card.id - 1] = StatusCardEnum_NP.ON_DECK_LEVEL1
         
         # Se tutte le carte riservate dai giocatori avversari di livello 2 sono visibili
         if all_reserved_cards_visible_level2:
             # Imposta lo stato delle carte ancora disponibili nel mazzo livello 2
             for card in context_match.deck_level2:
-                cards_level2['position'][card.id - 41] = StatusCardEnum_NP.ON_DECK_LEVEL2
+                game_state['cards_level2'][card.id - 41] = StatusCardEnum_NP.ON_DECK_LEVEL2
         
         # Se tutte le carte riservate dai giocatori avversari di livello 3 sono visibili
         if all_reserved_cards_visible_level3:
             # Imposta lo stato delle carte ancora disponibili nel mazzo livello 3
             for card in context_match.deck_level3:
-                cards_level3['position'][card.id - 71] = StatusCardEnum_NP.ON_DECK_LEVEL3
-        
-        # Imposta lo stato delle carte riservate dal giocatore
-        game_state['cards_level1'] = cards_level1
-        game_state['cards_level2'] = cards_level2
-        game_state['cards_level3'] = cards_level3
-        game_state['nobles'] = nobles
+                game_state['cards_level3'][card.id - 71] = StatusCardEnum_NP.ON_DECK_LEVEL3
 
         return game_state
 

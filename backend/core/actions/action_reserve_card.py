@@ -8,7 +8,7 @@ from core.helpers.player_helper import PlayerHelper
 from core.helpers.match_helper import MatchHelper
 from core.actions.action import Action
 
-from ai_player.np_array_types import ( dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
+from ai_player.np_array_types import ( ColorEnum_NP, dtype_status_before_afterAction, dtype_status_card, dtype_status_game,
                               dtype_status_player, dtype_noble, StatusCardEnum_NP, StatusNobleEnum_NP )
 
 # Implementazione della classe ActionReserveCard che eredita da Action
@@ -116,20 +116,24 @@ class ActionReserveCard(Action):
             raise ValueError(f"Card with id {self.card_id} not found in visible cards or decks")
 
         # Aggiungi la carta al giocatore
-        data_after['players'][0]['cards_' + card.color][player.id] += 1
+        data_after['players'][player.id]['cards_' + card.color] += 1
+
+        readable_data = AIUtils.numpy_to_readable(data_after)
 
         # Aggiungi un gettone "gold" al giocatore se disponibile e se non ha già 10 gettoni
         if self.context_match.tokens.gold > 0 and PlayerHelper.get_sum_tokens(player) < 10:
-            data_after['players'][0]['tokens_' + ColorEnum.GOLD.value][player.id] += 1
+            data_after['players'][player.id]['tokens_' + ColorEnum_NP.GOLD.name.lower()] += 1
             # Rimuovi un gettone "gold" dal tavolo
-            data_after['tokens_' + ColorEnum.GOLD.value] -= 1
+            data_after['tokens_' + ColorEnum_NP.GOLD.name.lower()] -= 1
+
+        readable_data_after = AIUtils.numpy_to_readable(data_after)
 
         # Aggiorna lo stato della carta
         if card.level == 1:
-            data_after['cards_level1'][0]['position'][card.id - 1] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + player.id
+            data_after['cards_level1'][card.id - 1] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + player.id
         elif card.level == 2:
-            data_after['cards_level2'][0]['position'][card.id - 41] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + player.id
+            data_after['cards_level2'][card.id - 41] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + player.id
         else:
-            data_after['cards_level3'][0]['position'][card.id - 71] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + player.id
+            data_after['cards_level3'][card.id - 71] = int(StatusCardEnum_NP.RESERVED_PLAYER1) + player.id
         
         return data_after

@@ -71,7 +71,7 @@ def init_new_context_and_players(data: np.array, before_context: ContextMatch) -
 
     # Crea i giocatori
     for i in range(4):
-        if data['players'][0]['points'][i] == -1 or data['players'][0]['points'][i] == 255:
+        if data['players'][i]['points'] == -1 or data['players'][i]['points'] == 255:
             continue
 
         player = Player(
@@ -120,12 +120,12 @@ def test_tokens_players_from_np_array(data: np.array, before_context: ContextMat
 
     for player in after_context.players:
         player.tokens = ListTokenCount(
-            violet=int(data['players'][0]['tokens_violet'][player.id]),
-            blue=int(data['players'][0]['tokens_blue'][player.id]),
-            green=int(data['players'][0]['tokens_green'][player.id]),
-            red=int(data['players'][0]['tokens_red'][player.id]),
-            black=int(data['players'][0]['tokens_black'][player.id]),
-            gold=int(data['players'][0]['tokens_gold'][player.id])
+            violet=int(data['players'][player.id]['tokens_violet']),
+            blue=int(data['players'][player.id]['tokens_blue']),
+            green=int(data['players'][player.id]['tokens_green']),
+            red=int(data['players'][player.id]['tokens_red']),
+            black=int(data['players'][player.id]['tokens_black']),
+            gold=int(data['players'][player.id]['tokens_gold'])
         )
 
         print("gettoni giocatore prima id", player.id, "tokens", before_context.players[player.id].tokens)
@@ -144,7 +144,7 @@ def test_card_visible(data: np.array, before_context: ContextMatch, after_contex
 
     # Carte visibili livello 1
     for id_card in range(1, 41):
-        if data['cards_level1'][0]['position'][id_card - 1] == int(StatusCardEnum_NP.VISIBLE_LEVEL1):
+        if data['cards_level1'][id_card - 1] == int(StatusCardEnum_NP.VISIBLE_LEVEL1):
             card = Card(id=id_card)
             after_context.visible_level1.append(card)
         
@@ -157,7 +157,7 @@ def test_card_visible(data: np.array, before_context: ContextMatch, after_contex
 
     # Carte visibili livello 2
     for id_card in range(41, 71):
-        if data['cards_level2'][0]['position'][id_card - 41] == int(StatusCardEnum_NP.VISIBLE_LEVEL2):
+        if data['cards_level2'][id_card - 41] == int(StatusCardEnum_NP.VISIBLE_LEVEL2):
             card = Card(id=id_card)
             after_context.visible_level2.append(card)
     
@@ -170,7 +170,7 @@ def test_card_visible(data: np.array, before_context: ContextMatch, after_contex
 
     # Carte visibili livello 3
     for id_card in range(71, 91):
-        if data['cards_level3'][0]['position'][id_card - 71] == int(StatusCardEnum_NP.VISIBLE_LEVEL3):
+        if data['cards_level3'][id_card - 71] == int(StatusCardEnum_NP.VISIBLE_LEVEL3):
             card = Card(id=id_card)
             after_context.visible_level3.append(card)
         

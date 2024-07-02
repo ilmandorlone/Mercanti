@@ -49,8 +49,22 @@ def player_move(match: Match, player: Player):
 
     # Ottiene lo stato del gioco prima e dopo l'azione per ogni azione possibile
     for action in actions:
+        # verifica se l'azione è di tipo TokenAction
+        if isinstance(action, ActionSelectTokens):
+            pass
+
+        # Verifica se l'azione è dipo TokenAction con 2 gettoni dello stesso colore
+        if isinstance(action, ActionSelectTokens) and len(action.token_actions) == 1:
+            pass
+
         before = AIUtils.convert_context_match_to_status_game_for_ai_player(match.context, player)
         after = action.execute_on_data_array(before)
+
+        #before_readable = AIUtils.numpy_to_readable(before)
+        #after_readable = AIUtils.numpy_to_readable(after)
+        #print(f"Before: {before_readable}")
+        #print(f"After: {after_readable}")
+        #pass
     
     # Esegue l'azione
     action.execute()
